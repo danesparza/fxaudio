@@ -29,6 +29,8 @@ func start(cmd *cobra.Command, args []string) {
 	//	If we have a config file, report it:
 	if viper.ConfigFileUsed() != "" {
 		log.Println("[DEBUG] Using config file:", viper.ConfigFileUsed())
+	} else {
+		log.Println("[DEBUG] No config file found.")
 	}
 
 	//	Create our 'sigs' and 'done' channels (this is for graceful shutdown)
@@ -63,7 +65,7 @@ func start(cmd *cobra.Command, args []string) {
 		UIRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("uiservice.ui-dir")))))
 	}
 
-	//	SERVICE ROUTES
+	//	PLAY ROUTES
 	//	-- Log data
 	UIRouter.HandleFunc("/v1/play", apiService.PlayAudio).Methods("GET") // play audio
 

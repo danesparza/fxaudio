@@ -14,8 +14,9 @@ import (
 )
 
 var (
-	cfgFile  string
-	loglevel string
+	cfgFile               string
+	problemWithConfigFile bool
+	loglevel              string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -23,9 +24,6 @@ var rootCmd = &cobra.Command{
 	Use:   "fxaudio",
 	Short: "REST service for multichannel audio",
 	Long:  `REST service for multichannel audio.  For your digital effects and soundtrack needs.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -74,9 +72,9 @@ func initConfig() {
 	viper.SetDefault("uiservice.port", 3000)
 	viper.SetDefault("uiservice.allowed-origins", "*")
 
-	// Use the config file.  Track if there was an error
+	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("[ERROR] There was an error reading in the config file: %v", err)
+		problemWithConfigFile = true
 	}
 
 	//	Set the log level from config (if we have it)

@@ -21,6 +21,7 @@ jobs:
           name: Run tests
           command: |
             mkdir -p /tmp/test-reports
+            mkdir -p /home/circleci/fxaudio/db
             gotestsum --junitfile /tmp/test-reports/unit-tests.xml
       - store_test_results:
           path: /tmp/test-reports

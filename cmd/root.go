@@ -39,7 +39,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/fxaudio.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&loglevel, "loglevel", "l", "WARN", "Log level: DEBUG/INFO/WARN/ERROR")
+	rootCmd.PersistentFlags().StringVarP(&loglevel, "loglevel", "l", "INFO", "Log level: DEBUG/INFO/WARN/ERROR")
 
 	//	Bind config flags for optional config file override:
 	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
@@ -66,7 +66,7 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	//	Set our defaults
-	viper.SetDefault("loglevel", "ERROR")
+	viper.SetDefault("loglevel", "INFO")
 	viper.SetDefault("datastore.system", path.Join(home, "fxaudio", "db", "system.db"))
 	viper.SetDefault("datastore.retentiondays", 30)
 	viper.SetDefault("uiservice.port", 3000)

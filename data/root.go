@@ -2,6 +2,8 @@ package data
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/tidwall/buntdb"
@@ -15,6 +17,11 @@ type Manager struct {
 // NewManager creates a new instance of a Manager and returns it
 func NewManager(systemdbpath string) (*Manager, error) {
 	retval := new(Manager)
+
+	//	Make sure the path already exists:
+	if err := os.MkdirAll(filepath.Dir(systemdbpath), os.FileMode(0664)); err != nil {
+		return nil, err
+	}
 
 	sysdb, err := buntdb.Open(systemdbpath)
 	if err != nil {

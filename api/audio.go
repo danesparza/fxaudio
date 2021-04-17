@@ -7,6 +7,20 @@ import (
 	"os/exec"
 )
 
+/*
+
+/audio
+PUT - Upload file
+GET - List all files
+POST - Play a random file (or if passed an endpoint in JSON, stream that file)
+
+/audio/1
+GET - Download file
+POST - Play file
+DELETE - Delete file
+
+*/
+
 // PlayAudio plays an audio file
 func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
@@ -45,7 +59,6 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Status:  http.StatusOK,
 		Message: "Events fetched",
 		Data:    "The data",
 	}

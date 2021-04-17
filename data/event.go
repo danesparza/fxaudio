@@ -9,7 +9,7 @@ import (
 	"github.com/tidwall/buntdb"
 )
 
-// Event represents a system in the system.  These events
+// Event represents an event in the system.  These events
 // can be logged or passed (as meta information) to other systems
 type Event struct {
 	ID        string    `json:"id"`        // Unique Event ID

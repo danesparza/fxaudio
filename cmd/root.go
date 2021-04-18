@@ -69,6 +69,8 @@ func initConfig() {
 	viper.SetDefault("loglevel", "INFO")
 	viper.SetDefault("datastore.system", path.Join(home, "fxaudio", "db", "system.db"))
 	viper.SetDefault("datastore.retentiondays", 30)
+	viper.SetDefault("upload.path", path.Join(home, "fxaudio", "uploads"))
+	viper.SetDefault("upload.bytelimit", 15*1024*1024) // 15MB
 	viper.SetDefault("uiservice.port", 3000)
 	viper.SetDefault("uiservice.allowed-origins", "*")
 

@@ -65,9 +65,25 @@ func start(cmd *cobra.Command, args []string) {
 		UIRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("uiservice.ui-dir")))))
 	}
 
-	//	PLAY ROUTES
-	//	-- Log data
-	UIRouter.HandleFunc("/v1/play", apiService.PlayAudio).Methods("GET") // play audio
+	/*
+
+		/audio
+		PUT - Upload file
+		GET - List all files
+		POST - Play a random file (or if passed an endpoint in JSON, stream that file)
+
+		/audio/1
+		GET - Download file
+		POST - Play file
+		DELETE - Delete file
+
+	*/
+	//	AUDIO ROUTES
+	UIRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT") //	Upload a file
+	UIRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("GET")  // 	List all files
+	UIRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST") // 	Play a random file (or play the endpoint specified in JSON)
+
+	//	EVENT ROUTES
 
 	//	Setup the CORS options:
 	log.Printf("[INFO] Allowed CORS origins: %s\n", viper.GetString("uiservice.allowed-origins"))

@@ -99,13 +99,13 @@ func TestFile_DeleteFile_ValidFiles_Successful(t *testing.T) {
 	db.AddFile(testFile1.FilePath, testFile1.Description)
 	newFile2, _ := db.AddFile(testFile2.FilePath, testFile2.Description)
 	db.AddFile(testFile3.FilePath, testFile3.Description)
-	db.DeleteFile(newFile2.ID) //	Delete the 2nd file
+	err = db.DeleteFile(newFile2.ID) //	Delete the 2nd file
 
-	gotFiles, err := db.GetAllFiles()
+	gotFiles, _ := db.GetAllFiles()
 
 	//	Assert
 	if err != nil {
-		t.Errorf("GetAllFiles - Should get all files without error, but got: %s", err)
+		t.Errorf("DeleteFile - Should delete file without error, but got: %s", err)
 	}
 
 	if len(gotFiles) != 2 {

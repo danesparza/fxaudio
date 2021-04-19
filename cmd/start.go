@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/danesparza/fxaudio/api"
+	"github.com/danesparza/fxaudio/data"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
@@ -40,11 +41,19 @@ func start(cmd *cobra.Command, args []string) {
 	//	Indicate what signals we're waiting for:
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 
+	//	Create a DBManager object and associate with the api.Service
+	db, err := data.NewManager(viper.GetString("datastore.system"))
+	if err != nil {
+		log.Printf("[ERROR] Error trying to open the system database: %s", err)
+		return
+	}
+	defer db.Close()
+
 	//	Create an api service object
-	apiService := api.Service{StartTime: time.Now()}
+	apiService := api.Service{DB: db, StartTime: time.Now()}
 
 	//	Create a router and setup our REST endpoints...
-	UIRouter := mux.NewRouter()
+	restRouter := mux.NewRouter()
 
 	//	UI ROUTES
 	if viper.GetString("uiservice.ui-dir") == "" {
@@ -62,7 +71,7 @@ func start(cmd *cobra.Command, args []string) {
 	} else {
 		//	Use the supplied directory:
 		log.Printf("[INFO] Using UI directory: %s\n", viper.GetString("uiservice.ui-dir"))
-		UIRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("uiservice.ui-dir")))))
+		restRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("uiservice.ui-dir")))))
 	}
 
 	/*
@@ -79,9 +88,9 @@ func start(cmd *cobra.Command, args []string) {
 
 	*/
 	//	AUDIO ROUTES
-	UIRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT") //	Upload a file
-	UIRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("GET")  // 	List all files
-	UIRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST") // 	Play a random file (or play the endpoint specified in JSON)
+	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT") //	Upload a file
+	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("GET")  // 	List all files
+	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST") // 	Play a random file (or play the endpoint specified in JSON)
 
 	//	EVENT ROUTES
 
@@ -91,7 +100,7 @@ func start(cmd *cobra.Command, args []string) {
 	uiCorsRouter := cors.New(cors.Options{
 		AllowedOrigins:   strings.Split(viper.GetString("uiservice.allowed-origins"), ","),
 		AllowCredentials: true,
-	}).Handler(UIRouter)
+	}).Handler(restRouter)
 
 	//	Format the bound interface:
 	formattedUIInterface := viper.GetString("uiservice.bind")

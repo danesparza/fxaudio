@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/danesparza/fxaudio/data"
 )
 
 // Service encapsulates API service operations
 type Service struct {
+	DB        *data.Manager
 	StartTime time.Time
 }
 

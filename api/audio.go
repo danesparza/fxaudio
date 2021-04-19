@@ -8,7 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"time"
 
+	"github.com/danesparza/fxaudio/event"
+	"github.com/danesparza/fxaudio/mediatype"
 	"github.com/spf13/viper"
 )
 
@@ -85,7 +88,19 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	//	Add it to our system database
+	service.DB.AddFile(destinationFile, "Audio file")
 
+	//	Record the event:
+	service.DB.AddEvent(event.FileUploaded, mediatype.Audio, fileHeader.Filename, time.Duration(30*24)*time.Hour)
+
+	//	If we've gotten this far, indicate a successful upload
+	response := SystemResponse{
+		Message: "File uploaded",
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
 }
 
 // PlayAudio plays an audio file
@@ -105,6 +120,7 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 			return
 		}
 	*/
+
 	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
 	//	Instructions on how to install it:
 	//	https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-test

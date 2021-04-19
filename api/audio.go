@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/danesparza/fxaudio/event"
@@ -33,6 +34,15 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 
 	MAX_UPLOAD_SIZE := viper.GetInt64("upload.bytelimit")
 	UploadPath := viper.GetString("upload.path")
+	retentiondays := viper.GetString("datastore.retentiondays")
+
+	//	Double check event history TTL config
+	historyttl, err := strconv.Atoi(retentiondays)
+	if err != nil {
+		err = fmt.Errorf("datastore.retentiondays config is invalid: %s", err)
+		sendErrorResponse(rw, err, http.StatusRequestEntityTooLarge)
+		return
+	}
 
 	//	First check for maximum uplooad size and return an error if we exceed it.
 	req.Body = http.MaxBytesReader(rw, req.Body, MAX_UPLOAD_SIZE)
@@ -52,12 +62,6 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer file.Close()
-
-	/*
-		fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-		fmt.Printf("File Size: %+v\n", handler.Size)
-		fmt.Printf("MIME Header: %+v\n", handler.Header)
-	*/
 
 	// Create the uploads folder if it doesn't
 	// already exist
@@ -91,7 +95,7 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 	service.DB.AddFile(destinationFile, "Audio file")
 
 	//	Record the event:
-	service.DB.AddEvent(event.FileUploaded, mediatype.Audio, fileHeader.Filename, time.Duration(30*24)*time.Hour)
+	service.DB.AddEvent(event.FileUploaded, mediatype.Audio, fileHeader.Filename, time.Duration(int(historyttl)*24)*time.Hour)
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{
@@ -99,6 +103,7 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	//	Serialize to JSON & return the response:
+	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(rw).Encode(response)
 }

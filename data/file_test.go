@@ -74,7 +74,6 @@ func TestFile_GetAllFiles_ValidFiles_Successful(t *testing.T) {
 	if gotFiles[1].Description != newFile2.Description {
 		t.Errorf("GetAllFiles failed: Should get an item with the correct details: %+v", gotFiles[1])
 	}
-
 }
 
 func TestFile_DeleteFile_ValidFiles_Successful(t *testing.T) {

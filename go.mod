@@ -9,6 +9,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.1 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
+	github.com/pterm/pterm v0.12.13 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/rs/xid v1.3.0 // indirect
 	github.com/spf13/afero v1.2.2 // indirect
@@ -18,6 +19,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.0
 	github.com/tidwall/buntdb v1.2.3 // indirect
-	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	gopkg.in/ini.v1 v1.57.0 // indirect
 )

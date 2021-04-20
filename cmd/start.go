@@ -74,23 +74,12 @@ func start(cmd *cobra.Command, args []string) {
 		restRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("uiservice.ui-dir")))))
 	}
 
-	/*
-
-		/audio
-		PUT - Upload file
-		GET - List all files
-		POST - Play a random file (or if passed an endpoint in JSON, stream that file)
-
-		/audio/1
-		GET - Download file
-		POST - Play file
-		DELETE - Delete file
-
-	*/
 	//	AUDIO ROUTES
-	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT") //	Upload a file
-	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("GET")  // 	List all files
-	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST") // 	Play a random file (or play the endpoint specified in JSON)
+	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT")         // Upload a file
+	restRouter.HandleFunc("/v1/audio", apiService.ListAllFiles).Methods("GET")       // List all files
+	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST")         // Play a random file (or play the endpoint specified in JSON)
+	restRouter.HandleFunc("/v1/audio/{id}", apiService.PlayAudio).Methods("POST")    // Play a file
+	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE") // Delete a file
 
 	//	EVENT ROUTES
 

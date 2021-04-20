@@ -13,6 +13,7 @@ import (
 
 	"github.com/danesparza/fxaudio/event"
 	"github.com/danesparza/fxaudio/mediatype"
+	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 )
 
@@ -108,11 +109,79 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
+//	ListAllFiles lists all files in the system
+func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
+
+	//	Get a list of files
+	retval, err := service.DB.GetAllFiles()
+	if err != nil {
+		err = fmt.Errorf("error getting a list of files: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Construct our response
+	response := SystemResponse{
+		Message: "File list",
+		Data:    retval,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
+//	DeleteFile deletes a file in the system
+func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
+
+	//	Get the id from the url (if it's blank, return an error)
+	vars := mux.Vars(req)
+	if vars["id"] == "" {
+		err := fmt.Errorf("requires an id of a file to delete")
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Delete the file
+	err := service.DB.DeleteFile(vars["id"])
+	if err != nil {
+		err = fmt.Errorf("error deleting file: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Construct our response
+	response := SystemResponse{
+		Message: "File deleted",
+		Data:    vars["id"],
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
 // PlayAudio plays an audio file
 func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	req.Body is a ReadCloser -- we need to remember to close it:
 	defer req.Body.Close()
+
+	//	Get the id from the url (if it's blank, return an error)
+	vars := mux.Vars(req)
+	if vars["id"] == "" {
+		err := fmt.Errorf("requires an id of a file to play")
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Get the file information
+	fileToPlay, err := service.DB.GetFile(vars["id"])
+	if err != nil {
+		err = fmt.Errorf("error getting file information: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
 
 	/*
 		//	Make sure omxplayer is installed (for HDMI based audio)
@@ -129,26 +198,32 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
 	//	Instructions on how to install it:
 	//	https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-test
-	_, err := exec.LookPath("mpg123")
+	_, err = exec.LookPath("mpg123")
 	if err != nil {
 		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+		return
+	}
+
+	//	Get the file and play it:
+	playCommand := exec.Command("mpg123", fileToPlay.FilePath)
+
+	if err = playCommand.Start(); err != nil {
+		err = fmt.Errorf("error starting to play: %v", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
 
-	/*
-		//	Get the file and play it:
-		events, err := service.DB.GetAllEvents()
-		if err != nil {
-			sendErrorResponse(rw, err, http.StatusInternalServerError)
-			return
-		}
-	*/
+	if err = playCommand.Wait(); err != nil {
+		err = fmt.Errorf("error waiting for play to finish: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Events fetched",
-		Data:    "The data",
+		Message: "Audio played",
+		Data:    fileToPlay,
 	}
 
 	//	Serialize to JSON & return the response:

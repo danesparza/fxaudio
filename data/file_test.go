@@ -37,6 +37,44 @@ func TestFile_AddFile_ValidFile_Successful(t *testing.T) {
 
 }
 
+func TestFile_GetFile_ValidFile_Successful(t *testing.T) {
+
+	//	Arrange
+	systemdb := getTestFiles()
+
+	db, err := data.NewManager(systemdb)
+	if err != nil {
+		t.Fatalf("NewManager failed: %s", err)
+	}
+	defer func() {
+		db.Close()
+		os.RemoveAll(systemdb)
+	}()
+
+	testFile1 := data.File{FilePath: "crossbones1.mp3", Description: "Unit test 1 file"}
+	testFile2 := data.File{FilePath: "crossbones2.mp3", Description: "Unit test 2 file"}
+	testFile3 := data.File{FilePath: "crossbones3.mp3", Description: "Unit test 3 file"}
+
+	//	Act
+	db.AddFile(testFile1.FilePath, testFile1.Description)
+	newFile2, _ := db.AddFile(testFile2.FilePath, testFile2.Description)
+	db.AddFile(testFile3.FilePath, testFile3.Description)
+
+	gotFile, err := db.GetFile(newFile2.ID)
+
+	//	Log the file details:
+	t.Logf("File: %+v", gotFile)
+
+	//	Assert
+	if err != nil {
+		t.Errorf("GetFile - Should get file without error, but got: %s", err)
+	}
+
+	if len(gotFile.ID) < 2 {
+		t.Errorf("GetFile failed: Should get valid id but got: %v", gotFile.ID)
+	}
+}
+
 func TestFile_GetAllFiles_ValidFiles_Successful(t *testing.T) {
 
 	//	Arrange

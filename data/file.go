@@ -53,6 +53,39 @@ func (store Manager) AddFile(filepath, description string) (File, error) {
 	return retval, nil
 }
 
+// GetFile gets information about a single file in the system based on its id
+func (store Manager) GetFile(id string) (File, error) {
+	//	Our return item
+	retval := File{}
+
+	//	Find the item:
+	err := store.systemdb.View(func(tx *buntdb.Tx) error {
+
+		val, err := tx.Get(GetKey("File", id))
+		if err != nil {
+			return err
+		}
+
+		if len(val) > 0 {
+			//	Unmarshal data into our item
+			if err := json.Unmarshal([]byte(val), &retval); err != nil {
+				return err
+			}
+		}
+
+		//	If we get to this point and there is no error...
+		return nil
+	})
+
+	//	If there was an error, report it:
+	if err != nil {
+		return retval, fmt.Errorf("problem getting the files: %s", err)
+	}
+
+	//	Return our data:
+	return retval, nil
+}
+
 // GetAllFiles gets all files in the system
 func (store Manager) GetAllFiles() ([]File, error) {
 	//	Our return item

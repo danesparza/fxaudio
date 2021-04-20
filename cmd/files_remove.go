@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/danesparza/fxaudio/data"
 	"github.com/spf13/cobra"
@@ -20,31 +21,35 @@ Remove a file managed by fxaudio by passing the ID to remove
 Example:
 fxaudio files remove c1ucgu16v83ji73f1m60`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("remove called with %s\n", args[0])
+		removeId := args[0]
 
 		//	Create a DBManager object
 		db, err := data.NewManager(viper.GetString("datastore.system"))
 		if err != nil {
-			log.Printf("[ERROR] Error trying to open the system database: %s", err)
-			return
+			log.Fatalf("[ERROR] Error trying to open the system database: %s", err)
 		}
 		defer db.Close()
 
 		//	Find the file information:
-		/*
-			gotFiles, err := db.GetAllFiles()
-			if err != nil {
-				log.Fatalf("[ERROR] Error trying to get all files: %s", err)
-			}
-		*/
+		gotFile, err := db.GetFile(removeId)
+		if err != nil {
+			log.Fatalf("[ERROR] Error trying to find fileid %s: %s", removeId, err)
+		}
 
 		//	Remove the file from the system
+		if err = db.DeleteFile(removeId); err != nil {
+			log.Fatalf("[ERROR] Error removing file from system %s: %s", gotFile.FilePath, err)
+			return
+		}
 
 		//	Delete the file on disk
+		if err = os.Remove(gotFile.FilePath); err != nil {
+			log.Fatalf("[ERROR] Error removing file from disk %s: %s", gotFile.FilePath, err)
+			return
+		}
 
 		//	Indicate that the file was removed
-
-		//	Get a list of all files:
+		fmt.Printf("\nFile %s removed\n", removeId)
 
 	},
 }

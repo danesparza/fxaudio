@@ -20,11 +20,17 @@ jobs:
           paths:
             - "/go/pkg/mod"
       - run:
+          name: Setup Environment Variables
+          command: echo 'export DEBIAN_PACKAGE_NAME="fxaudio-1.0.${CIRCLE_BUILD_NUM}_armhf"' >> $BASH_ENV 
+      - run:
          name: Get compiler tool
          command: go get github.com/mitchellh/gox
       - run:
          name: Get release tool
          command: go get github.com/tcnksm/ghr
+      - run:
+         name: Get utilities
+         command: go get github.com/danesparza/tokenreplace
       - run:
           name: Run tests
           command: |
@@ -36,6 +42,12 @@ jobs:
       - run:
          name: Create binaries for all platforms
          command: mkdir -p /tmp/binaries; gox -osarch="linux/arm windows/amd64" -ldflags "-X $PACKAGE_PATH/cmd.BuildVersion=1.0.$CIRCLE_BUILD_NUM -X $PACKAGE_PATH/cmd.CommitID=$CIRCLE_SHA1" -output "/tmp/binaries/${CIRCLE_PROJECT_REPONAME}_{{.OS}}_{{.Arch}}" $PACKAGE_PATH/...
+      - run:
+         name: Setup the debian package
+         command: mkdir -p "/tmp/packagestage"; cp -r "${PROJECT_DIR}/dist" "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/postinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/prerm"; tokenreplace -file "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/control" -token="{build}" -replacement="${CIRCLE_BUILD_NUM}"; 
+      - run:
+         name: Create the debian package
+         command: mkdir -p "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin"; cp "/tmp/binaries/fxaudio_linux_arm" "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin/fxaudio"; cd /tmp/packagestage; dpkg -b "${DEBIAN_PACKAGE_NAME}"; mv *.deb "/tmp/binaries";      
       - run: 
          name: Push the release to Github
          command: ghr -prerelease -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME v1.0.$CIRCLE_BUILD_NUM /tmp/binaries/ || true

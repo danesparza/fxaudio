@@ -7,6 +7,7 @@ jobs:
       - image: circleci/golang:1.16
     environment:
       PACKAGE_PATH: "github.com/danesparza/fxaudio"
+      PROJECT_DIR: "/go/src/github.com/danesparza/fxaudio"
     steps:
       - checkout
       - restore_cache:

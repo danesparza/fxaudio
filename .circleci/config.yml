@@ -7,7 +7,6 @@ jobs:
       - image: circleci/golang:1.16
     environment:
       PACKAGE_PATH: "github.com/danesparza/fxaudio"
-      PROJECT_DIR: "/home/"
     steps:
       - checkout
       - restore_cache:
@@ -45,7 +44,7 @@ jobs:
          command: mkdir -p /tmp/binaries; gox -osarch="linux/arm windows/amd64" -ldflags "-X $PACKAGE_PATH/cmd.BuildVersion=1.0.$CIRCLE_BUILD_NUM -X $PACKAGE_PATH/cmd.CommitID=$CIRCLE_SHA1" -output "/tmp/binaries/${CIRCLE_PROJECT_REPONAME}_{{.OS}}_{{.Arch}}" $PACKAGE_PATH/...
       - run:
          name: Setup the debian package
-         command: mkdir -p "/tmp/packagestage"; cp -r ${CIRCLE_WORKING_DIRECTORY}/dist "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/postinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/prerm"; tokenreplace -file "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/control" -token="{build}" -replacement="${CIRCLE_BUILD_NUM}"; 
+         command: mkdir -p "/tmp/packagestage"; cp -r /home/circleci/repo/dist "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/postinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/prerm"; tokenreplace -file "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/control" -token="{build}" -replacement="${CIRCLE_BUILD_NUM}"; 
       - run:
          name: Create the debian package
          command: mkdir -p "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin"; cp "/tmp/binaries/fxaudio_linux_arm" "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin/fxaudio"; cd /tmp/packagestage; dpkg -b "${DEBIAN_PACKAGE_NAME}"; mv *.deb "/tmp/binaries";      

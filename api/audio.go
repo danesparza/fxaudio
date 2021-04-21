@@ -214,15 +214,9 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err = playCommand.Wait(); err != nil {
-		err = fmt.Errorf("error waiting for play to finish: %v", err)
-		sendErrorResponse(rw, err, http.StatusInternalServerError)
-		return
-	}
-
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Audio played",
+		Message: "Audio playing",
 		Data:    fileToPlay,
 	}
 

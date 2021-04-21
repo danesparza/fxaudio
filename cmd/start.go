@@ -56,7 +56,7 @@ func start(cmd *cobra.Command, args []string) {
 	restRouter := mux.NewRouter()
 
 	//	UI ROUTES
-	if viper.GetString("uiservice.ui-dir") == "" {
+	if viper.GetString("server.ui-dir") == "" {
 		//	Use the static assets file generated with
 		//	https://github.com/elazarl/go-bindata-assetfs using the application-monitor-ui from
 		//	https://github.com/danesparza/application-monitor-ui.
@@ -70,8 +70,8 @@ func start(cmd *cobra.Command, args []string) {
 		//  UIRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(assetFS())))
 	} else {
 		//	Use the supplied directory:
-		log.Printf("[INFO] Using UI directory: %s\n", viper.GetString("uiservice.ui-dir"))
-		restRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("uiservice.ui-dir")))))
+		log.Printf("[INFO] Using UI directory: %s\n", viper.GetString("server.ui-dir"))
+		restRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("server.ui-dir")))))
 	}
 
 	//	AUDIO ROUTES
@@ -84,17 +84,17 @@ func start(cmd *cobra.Command, args []string) {
 	//	EVENT ROUTES
 
 	//	Setup the CORS options:
-	log.Printf("[INFO] Allowed CORS origins: %s\n", viper.GetString("uiservice.allowed-origins"))
+	log.Printf("[INFO] Allowed CORS origins: %s\n", viper.GetString("server.allowed-origins"))
 
 	uiCorsRouter := cors.New(cors.Options{
-		AllowedOrigins:   strings.Split(viper.GetString("uiservice.allowed-origins"), ","),
+		AllowedOrigins:   strings.Split(viper.GetString("server.allowed-origins"), ","),
 		AllowCredentials: true,
 	}).Handler(restRouter)
 
 	//	Format the bound interface:
-	formattedUIInterface := viper.GetString("uiservice.bind")
-	if formattedUIInterface == "" {
-		formattedUIInterface = "127.0.0.1"
+	formattedServerInterface := viper.GetString("server.bind")
+	if formattedServerInterface == "" {
+		formattedServerInterface = "127.0.0.1"
 	}
 
 	//	Start our shutdown listener (for graceful shutdowns)
@@ -108,8 +108,8 @@ func start(cmd *cobra.Command, args []string) {
 
 	//	Start the API and UI services
 	go func() {
-		log.Printf("[INFO] Starting Management UI: http://%s:%s/ui/\n", formattedUIInterface, viper.GetString("uiservice.port"))
-		log.Printf("[ERROR] %v\n", http.ListenAndServe(viper.GetString("uiservice.bind")+":"+viper.GetString("uiservice.port"), uiCorsRouter))
+		log.Printf("[INFO] Starting Management UI: http://%s:%s/ui/\n", formattedServerInterface, viper.GetString("server.port"))
+		log.Printf("[ERROR] %v\n", http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter))
 	}()
 
 	//	Wait for our signal and shutdown gracefully

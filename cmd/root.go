@@ -71,8 +71,8 @@ func initConfig() {
 	viper.SetDefault("datastore.retentiondays", 30)
 	viper.SetDefault("upload.path", path.Join(home, "fxaudio", "uploads"))
 	viper.SetDefault("upload.bytelimit", 15*1024*1024) // 15MB
-	viper.SetDefault("uiservice.port", 3000)
-	viper.SetDefault("uiservice.allowed-origins", "*")
+	viper.SetDefault("server.port", 3000)
+	viper.SetDefault("server.allowed-origins", "*")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {

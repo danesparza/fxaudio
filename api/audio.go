@@ -208,16 +208,16 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Get the file and play it:
 	playCommand := exec.Command("mpg123", fileToPlay.FilePath)
 
-	if err = playCommand.Start(); err != nil {
-		err = fmt.Errorf("error starting to play: %v", err)
+	if err = playCommand.Run(); err != nil {
+		err = fmt.Errorf("error playing: %v", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Audio playing",
-		Data:    PlayAudioResponse{FileToPlay: fileToPlay, PID: playCommand.Process.Pid},
+		Message: "Audio played",
+		Data:    fileToPlay,
 	}
 
 	//	Serialize to JSON & return the response:

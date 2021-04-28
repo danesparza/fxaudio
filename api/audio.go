@@ -253,7 +253,7 @@ func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	//	Stop the process
-	if err = process.Kill(); err != nil {
+	if err = process.Signal(os.Interrupt); err != nil {
 		err = fmt.Errorf("error trying to stop process: %v", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return

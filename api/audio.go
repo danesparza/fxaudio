@@ -217,7 +217,52 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Create our response and send information back:
 	response := SystemResponse{
 		Message: "Audio playing",
-		Data:    fileToPlay,
+		Data:    PlayAudioResponse{FileToPlay: fileToPlay, PID: playCommand.Process.Pid},
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
+// StopAudio stops an audio file 'play' process
+func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
+
+	//	Get the id from the url (if it's blank, return an error)
+	vars := mux.Vars(req)
+	if vars["pid"] == "" {
+		err := fmt.Errorf("requires a pid of a process to stop")
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Format the pid
+	pid, err := strconv.Atoi(vars["pid"])
+	if err != nil {
+		err := fmt.Errorf("pid doesn't seem to be valid: %v", vars["pid"])
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Get the process information
+	process, err := os.FindProcess(pid)
+	if err != nil {
+		err := fmt.Errorf("can't find the process for pid: %v", pid)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Stop the process
+	if err = process.Kill(); err != nil {
+		err = fmt.Errorf("error trying to stop process: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Create our response and send information back:
+	response := SystemResponse{
+		Message: "Audio stopped",
+		Data:    pid,
 	}
 
 	//	Serialize to JSON & return the response:

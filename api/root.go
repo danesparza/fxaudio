@@ -21,6 +21,12 @@ type SystemResponse struct {
 	Data    interface{} `json:"data"`
 }
 
+// PlayAudioResponse encapsulates a response from the playaudio api call
+type PlayAudioResponse struct {
+	FileToPlay data.File `json:"filetoplay"`
+	PID        int       `json:"process"`
+}
+
 // ErrorResponse represents an API response
 type ErrorResponse struct {
 	Message string `json:"message"`

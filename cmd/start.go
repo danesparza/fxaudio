@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -34,12 +35,11 @@ func start(cmd *cobra.Command, args []string) {
 		log.Println("[DEBUG] No config file found.")
 	}
 
-	//	Create our 'sigs' and 'done' channels (this is for graceful shutdown)
-	sigs := make(chan os.Signal, 1)
-	done := make(chan bool, 1)
-
-	//	Indicate what signals we're waiting for:
+	//	Trap program exit appropriately
+	ctx, cancel := context.WithCancel(context.Background())
+	sigs := make(chan os.Signal, 2)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	go handleSignals(ctx, sigs, cancel)
 
 	//	Create a DBManager object and associate with the api.Service
 	db, err := data.NewManager(viper.GetString("datastore.system"))
@@ -75,11 +75,12 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	//	AUDIO ROUTES
-	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT")         // Upload a file
-	restRouter.HandleFunc("/v1/audio", apiService.ListAllFiles).Methods("GET")       // List all files
-	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST")         // Play a random file (or play the endpoint specified in JSON)
-	restRouter.HandleFunc("/v1/audio/{id}", apiService.PlayAudio).Methods("POST")    // Play a file
-	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE") // Delete a file
+	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT")            // Upload a file
+	restRouter.HandleFunc("/v1/audio", apiService.ListAllFiles).Methods("GET")          // List all files
+	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST")            // Play a random file (or play the endpoint specified in JSON)
+	restRouter.HandleFunc("/v1/audio/stop/{pid}", apiService.StopAudio).Methods("POST") // Stop playing a file
+	restRouter.HandleFunc("/v1/audio/{id}", apiService.PlayAudio).Methods("POST")       // Play a file
+	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE")    // Delete a file
 
 	//	EVENT ROUTES
 
@@ -97,26 +98,25 @@ func start(cmd *cobra.Command, args []string) {
 		formattedServerInterface = "127.0.0.1"
 	}
 
-	//	Start our shutdown listener (for graceful shutdowns)
-	go func() {
-		//	If we get a signal...
-		_ = <-sigs
-
-		//	Indicate we're done...
-		done <- true
-	}()
-
 	//	Start the API and UI services
-	go func() {
-		log.Printf("[INFO] Starting Management UI: http://%s:%s/ui/\n", formattedServerInterface, viper.GetString("server.port"))
-		log.Printf("[ERROR] %v\n", http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter))
-	}()
+	log.Printf("[INFO] Starting Management UI: http://%s:%s/ui/\n", formattedServerInterface, viper.GetString("server.port"))
+	log.Printf("[ERROR] %v\n", http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter))
+}
 
-	//	Wait for our signal and shutdown gracefully
-	<-done
-
-	log.Printf("[INFO] Shutting down ...")
-
+func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc) {
+	select {
+	case <-ctx.Done():
+	case sig := <-sigs:
+		switch sig {
+		case os.Interrupt:
+			log.Println("[INFO] SIGINT")
+		case syscall.SIGTERM:
+			log.Println("[INFO] SIGTERM")
+		}
+		log.Println("[INFO] Shutting down ...")
+		cancel()
+		os.Exit(0)
+	}
 }
 
 func init() {

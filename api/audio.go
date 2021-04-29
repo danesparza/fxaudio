@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -205,8 +206,11 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	//	Get the file and play it:
-	playCommand := exec.Command("mpg123", fileToPlay.FilePath)
+	playCommand := exec.CommandContext(ctx, "mpg123", fileToPlay.FilePath)
 
 	if err = playCommand.Run(); err != nil {
 		err = fmt.Errorf("error playing: %v", err)

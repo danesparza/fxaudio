@@ -12,6 +12,7 @@ import (
 
 	"github.com/danesparza/fxaudio/api"
 	"github.com/danesparza/fxaudio/data"
+	"github.com/danesparza/fxaudio/media"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
@@ -50,7 +51,7 @@ func start(cmd *cobra.Command, args []string) {
 	defer db.Close()
 
 	//	Create an api service object
-	apiService := api.Service{DB: db, StartTime: time.Now()}
+	apiService := api.Service{PlayMedia: make(chan media.PlayAudioRequest), StopMedia: make(chan string), DB: db, StartTime: time.Now()}
 
 	//	Create a router and setup our REST endpoints...
 	restRouter := mux.NewRouter()
@@ -83,6 +84,9 @@ func start(cmd *cobra.Command, args []string) {
 	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE")    // Delete a file
 
 	//	EVENT ROUTES
+
+	//	Start the media processor:
+	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia)
 
 	//	Setup the CORS options:
 	log.Printf("[INFO] Allowed CORS origins: %s\n", viper.GetString("server.allowed-origins"))

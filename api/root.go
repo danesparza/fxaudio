@@ -7,12 +7,19 @@ import (
 	"time"
 
 	"github.com/danesparza/fxaudio/data"
+	"github.com/danesparza/fxaudio/media"
 )
 
 // Service encapsulates API service operations
 type Service struct {
 	DB        *data.Manager
 	StartTime time.Time
+
+	// PlayMedia signals a file should be played
+	PlayMedia chan media.PlayAudioRequest
+
+	// StopMedia signals a file should stop playing
+	StopMedia chan string
 }
 
 // SystemResponse is a response for a system request

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,8 +12,10 @@ import (
 	"time"
 
 	"github.com/danesparza/fxaudio/event"
+	"github.com/danesparza/fxaudio/media"
 	"github.com/danesparza/fxaudio/mediatype"
 	"github.com/gorilla/mux"
+	"github.com/rs/xid"
 	"github.com/spf13/viper"
 )
 
@@ -206,22 +207,18 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	//	Get the file and play it:
-	playCommand := exec.CommandContext(ctx, "mpg123", fileToPlay.FilePath)
-
-	if err = playCommand.Run(); err != nil {
-		err = fmt.Errorf("error playing: %v", err)
-		sendErrorResponse(rw, err, http.StatusInternalServerError)
-		return
+	//	Send to the channel:
+	playRequest := media.PlayAudioRequest{
+		ProcessID: xid.New().String(), // Generate a new id
+		ID:        fileToPlay.ID,
+		FilePath:  fileToPlay.FilePath,
 	}
+	service.PlayMedia <- playRequest
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Audio played",
-		Data:    fileToPlay,
+		Message: "Audio playing",
+		Data:    playRequest,
 	}
 
 	//	Serialize to JSON & return the response:
@@ -235,38 +232,18 @@ func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Get the id from the url (if it's blank, return an error)
 	vars := mux.Vars(req)
 	if vars["pid"] == "" {
-		err := fmt.Errorf("requires a pid of a process to stop")
+		err := fmt.Errorf("requires a processid of a process to stop")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
 
-	//	Format the pid
-	pid, err := strconv.Atoi(vars["pid"])
-	if err != nil {
-		err := fmt.Errorf("pid doesn't seem to be valid: %v", vars["pid"])
-		sendErrorResponse(rw, err, http.StatusBadRequest)
-		return
-	}
-
-	//	Get the process information
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		err := fmt.Errorf("can't find the process for pid: %v", pid)
-		sendErrorResponse(rw, err, http.StatusInternalServerError)
-		return
-	}
-
-	//	Stop the process
-	if err = process.Signal(os.Interrupt); err != nil {
-		err = fmt.Errorf("error trying to stop process: %v", err)
-		sendErrorResponse(rw, err, http.StatusInternalServerError)
-		return
-	}
+	//	Send to the channel:
+	service.StopMedia <- vars["pid"]
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Audio stopped",
-		Data:    pid,
+		Message: "Audio stopping",
+		Data:    vars["pid"],
 	}
 
 	//	Serialize to JSON & return the response:

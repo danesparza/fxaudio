@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"sync"
 )
 
 type PlayAudioRequest struct {
@@ -12,11 +13,16 @@ type PlayAudioRequest struct {
 	FilePath  string `json:"filepath"` // Full filepath to the file
 }
 
+type audioProcessMap struct {
+	m       map[string]func()
+	rwMutex sync.RWMutex
+}
+
 // HandleAndProcess handles system context calls and channel events to play/stop audio
 func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest, stopaudio chan string) {
 
 	//	Create a map of running instances and their cancel functions
-	playingAudio := make(map[string]func())
+	playingAudio := audioProcessMap{m: make(map[string]func())}
 
 	//	Loop and respond to channels:
 	for {
@@ -32,7 +38,10 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 				//	Add an entry to the map with
 				//	- key: instance id
 				//	- value: the cancel function (pointer)
-				playingAudio[req.ProcessID] = cancel
+				//	(critical section)
+				playingAudio.rwMutex.Lock()
+				playingAudio.m[req.ProcessID] = cancel
+				playingAudio.rwMutex.Unlock()
 
 				//	Create the command with context and play the audio
 				playCommand := exec.CommandContext(ctx, "mpg123", playReq.FilePath)
@@ -43,19 +52,27 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 				}
 
 				//	Remove ourselves from the map and exit (critical section)
-				delete(playingAudio, req.ProcessID)
+				playingAudio.rwMutex.Lock()
+				delete(playingAudio.m, req.ProcessID)
+				playingAudio.rwMutex.Unlock()
 
 			}(systemctx, playReq) // Launch the goroutine
 
 		case stopFile := <-stopaudio:
 			//	Look up the item in the map and call cancel if the item exists:
-			if playCancel, exists := playingAudio[stopFile]; exists {
+			playingAudio.rwMutex.RLock()
+			playCancel, exists := playingAudio.m[stopFile]
+
+			if exists {
 				//	Call the context cancellation function (critical section)
 				playCancel()
 
 				//	Remove ourselves from the map and exit (critical section)
-				delete(playingAudio, stopFile)
+				playingAudio.rwMutex.Lock()
+				delete(playingAudio.m, stopFile)
+				playingAudio.rwMutex.Unlock()
 			}
+			playingAudio.rwMutex.RUnlock()
 		case <-systemctx.Done():
 			fmt.Println("Stopping audio processor")
 			return

@@ -60,19 +60,18 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 
 		case stopFile := <-stopaudio:
 			//	Look up the item in the map and call cancel if the item exists:
-			playingAudio.rwMutex.RLock()
+			playingAudio.rwMutex.Lock()
 			playCancel, exists := playingAudio.m[stopFile]
 
 			if exists {
-				//	Call the context cancellation function (critical section)
+				//	Call the context cancellation function
 				playCancel()
 
-				//	Remove ourselves from the map and exit (critical section)
-				playingAudio.rwMutex.Lock()
+				//	Remove ourselves from the map and exit
 				delete(playingAudio.m, stopFile)
-				playingAudio.rwMutex.Unlock()
 			}
-			playingAudio.rwMutex.RUnlock()
+			playingAudio.rwMutex.Unlock()
+
 		case <-systemctx.Done():
 			fmt.Println("Stopping audio processor")
 			return

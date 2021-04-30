@@ -80,7 +80,7 @@ func start(cmd *cobra.Command, args []string) {
 	restRouter.HandleFunc("/v1/audio", apiService.ListAllFiles).Methods("GET")          // List all files
 	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST")            // Play a random file (or play the endpoint specified in JSON)
 	restRouter.HandleFunc("/v1/audio/stop/{pid}", apiService.StopAudio).Methods("POST") // Stop playing a file
-	restRouter.HandleFunc("/v1/audio/{id}", apiService.PlayAudio).Methods("POST")       // Play a file
+	restRouter.HandleFunc("/v1/audio/{id}", apiService.PlayAudioId).Methods("POST")     // Play a file
 	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE")    // Delete a file
 
 	//	EVENT ROUTES

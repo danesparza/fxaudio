@@ -59,7 +59,7 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 			}(systemctx, playReq) // Launch the goroutine
 
 		case stopFile := <-stopaudio:
-			//	Look up the item in the map and call cancel if the item exists:
+			//	Look up the item in the map and call cancel if the item exists (critical section):
 			playingAudio.rwMutex.Lock()
 			playCancel, exists := playingAudio.m[stopFile]
 

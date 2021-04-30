@@ -22,16 +22,15 @@ type Service struct {
 	StopMedia chan string
 }
 
+// PlayAudioRequest represents a request to play an audio endpoint
+type PlayAudioRequest struct {
+	Endpoint string `json:"endpoint"`
+}
+
 // SystemResponse is a response for a system request
 type SystemResponse struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
-}
-
-// PlayAudioResponse encapsulates a response from the playaudio api call
-type PlayAudioResponse struct {
-	FileToPlay data.File `json:"filetoplay"`
-	PID        int       `json:"process"`
 }
 
 // ErrorResponse represents an API response

@@ -50,4 +50,4 @@ jobs:
          command: mkdir -p "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin"; cp "/tmp/binaries/fxaudio_linux_arm" "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin/fxaudio"; cd /tmp/packagestage; dpkg -b "${DEBIAN_PACKAGE_NAME}"; mv *.deb "/tmp/binaries";      
       - run: 
          name: Push the release to Github
-         command: ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} v1.0.${CIRCLE_BUILD_NUM} /tmp/binaries/ || true
+         command: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} v1.0.${CIRCLE_BUILD_NUM} /tmp/binaries/ || true

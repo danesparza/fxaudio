@@ -1,5 +1,5 @@
 # fxaudio [![CircleCI](https://circleci.com/gh/danesparza/fxaudio.svg?style=shield)](https://circleci.com/gh/danesparza/fxaudio)
-REST service for multichannel audio on demand from Raspberry Pi
+REST service for multichannel audio on demand from Raspberry Pi.  Made with ❤️ for makers, DIY craftsmen, and professional soundstage designers everywhere
 
 ## Prerequisites
 fxaudio uses [mpg123](https://en.wikipedia.org/wiki/Mpg123) under the hood to play audio, so you'll need to make sure it's installed first.  Lucky for you, installation is really simple:

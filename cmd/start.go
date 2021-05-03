@@ -51,7 +51,7 @@ func start(cmd *cobra.Command, args []string) {
 	defer db.Close()
 
 	//	Create an api service object
-	apiService := api.Service{PlayMedia: make(chan media.PlayAudioRequest), StopMedia: make(chan string), DB: db, StartTime: time.Now()}
+	apiService := api.Service{PlayMedia: make(chan media.PlayAudioRequest), StopMedia: make(chan string), StopAllMedia: make(chan bool), DB: db, StartTime: time.Now()}
 
 	//	Create a router and setup our REST endpoints...
 	restRouter := mux.NewRouter()
@@ -76,17 +76,21 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	//	AUDIO ROUTES
-	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT")            // Upload a file
-	restRouter.HandleFunc("/v1/audio", apiService.ListAllFiles).Methods("GET")          // List all files
-	restRouter.HandleFunc("/v1/audio", apiService.PlayAudio).Methods("POST")            // Play a random file (or play the endpoint specified in JSON)
+	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT")         // Upload a file
+	restRouter.HandleFunc("/v1/audio", apiService.ListAllFiles).Methods("GET")       // List all files
+	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE") // Delete a file
+
+	restRouter.HandleFunc("/v1/audio/play", apiService.PlayRandomAudio).Methods("POST") // Play a random file
+	restRouter.HandleFunc("/v1/audio/play/{id}", apiService.PlayAudio).Methods("POST")  // Play a file
+	restRouter.HandleFunc("/v1/audio/stream", apiService.StreamAudio).Methods("POST")   // Stream the endpoint specified in JSON
+	restRouter.HandleFunc("/v1/audio/stop", apiService.StopAllAudio).Methods("POST")    // Stop playing all audio
 	restRouter.HandleFunc("/v1/audio/stop/{pid}", apiService.StopAudio).Methods("POST") // Stop playing a file
-	restRouter.HandleFunc("/v1/audio/{id}", apiService.PlayAudioId).Methods("POST")     // Play a file
-	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE")    // Delete a file
 
 	//	EVENT ROUTES
+	//	/v1/events				//	List all events from the past n days
 
 	//	Start the media processor:
-	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia)
+	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia, apiService.StopAllMedia)
 
 	//	Setup the CORS options:
 	log.Printf("[INFO] Allowed CORS origins: %s\n", viper.GetString("server.allowed-origins"))

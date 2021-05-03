@@ -165,8 +165,8 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-// PlayAudioId plays an audio file
-func (service Service) PlayAudioId(rw http.ResponseWriter, req *http.Request) {
+// PlayAudio plays an audio file
+func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
 	vars := mux.Vars(req)
@@ -225,8 +225,8 @@ func (service Service) PlayAudioId(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-// PlayAudio plays an audio endpoint or a random file already uploaded
-func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
+// StreamAudio plays an audio endpoint
+func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	req.Body is a ReadCloser -- we need to remember to close it:
 	defer req.Body.Close()
@@ -241,6 +241,41 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get just the file endpoint:
 	fileendpoint := strings.TrimSpace(request.Endpoint)
+
+	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
+	_, err = exec.LookPath("mpg123")
+	if err != nil {
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+		return
+	}
+
+	//	Send to the channel:
+	playRequest := media.PlayAudioRequest{
+		ProcessID: xid.New().String(), // Generate a new id
+		FilePath:  fileendpoint,
+	}
+	service.PlayMedia <- playRequest
+
+	//	Create our response and send information back:
+	response := SystemResponse{
+		Message: "Audio playing",
+		Data:    playRequest,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
+// PlayAudio plays an audio endpoint or a random file already uploaded
+func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request) {
+
+	//	req.Body is a ReadCloser -- we need to remember to close it:
+	defer req.Body.Close()
+
+	//	Get just the file endpoint:
+	fileendpoint := ""
 
 	//	If we don't have an endpoint specified, get a random file that we manage
 	if fileendpoint == "" {
@@ -266,7 +301,7 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
-	_, err = exec.LookPath("mpg123")
+	_, err := exec.LookPath("mpg123")
 	if err != nil {
 		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
@@ -309,6 +344,23 @@ func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 	response := SystemResponse{
 		Message: "Audio stopping",
 		Data:    vars["pid"],
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
+// StopAllAudio stops all audio 'play' processes
+func (service Service) StopAllAudio(rw http.ResponseWriter, req *http.Request) {
+
+	//	Send to the channel:
+	service.StopAllMedia <- true
+
+	//	Create our response and send information back:
+	response := SystemResponse{
+		Message: "All Audio stopping",
+		Data:    ".",
 	}
 
 	//	Serialize to JSON & return the response:

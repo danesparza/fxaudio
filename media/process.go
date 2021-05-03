@@ -19,7 +19,7 @@ type audioProcessMap struct {
 }
 
 // HandleAndProcess handles system context calls and channel events to play/stop audio
-func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest, stopaudio chan string) {
+func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest, stopaudio chan string, stopallaudio chan bool) {
 
 	//	Create a map of running instances and their cancel functions
 	playingAudio := audioProcessMap{m: make(map[string]func())}
@@ -70,6 +70,22 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 				//	Remove ourselves from the map and exit
 				delete(playingAudio.m, stopFile)
 			}
+			playingAudio.rwMutex.Unlock()
+
+		case <-stopallaudio:
+			//	Loop through all items in the map and call cancel if the item exists (critical section):
+			playingAudio.rwMutex.Lock()
+			/*
+				playCancel, exists := playingAudio.m[stopFile]
+
+				if exists {
+					//	Call the context cancellation function
+					playCancel()
+
+					//	Remove ourselves from the map and exit
+					delete(playingAudio.m, stopFile)
+				}
+			*/
 			playingAudio.rwMutex.Unlock()
 
 		case <-systemctx.Done():

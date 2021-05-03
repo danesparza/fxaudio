@@ -20,6 +20,9 @@ type Service struct {
 
 	// StopMedia signals a file should stop playing
 	StopMedia chan string
+
+	//	StopAllMedia signals all audio should stop playing
+	StopAllMedia chan bool
 }
 
 // PlayAudioRequest represents a request to play an audio endpoint

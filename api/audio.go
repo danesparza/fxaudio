@@ -9,9 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/danesparza/fxaudio/event"
 	"github.com/danesparza/fxaudio/media"
@@ -39,15 +37,6 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 
 	MAX_UPLOAD_SIZE := viper.GetInt64("upload.bytelimit")
 	UploadPath := viper.GetString("upload.path")
-	retentiondays := viper.GetString("datastore.retentiondays")
-
-	//	Double check event history TTL config
-	historyttl, err := strconv.Atoi(retentiondays)
-	if err != nil {
-		err = fmt.Errorf("datastore.retentiondays config is invalid: %s", err)
-		sendErrorResponse(rw, err, http.StatusRequestEntityTooLarge)
-		return
-	}
 
 	//	First check for maximum uplooad size and return an error if we exceed it.
 	req.Body = http.MaxBytesReader(rw, req.Body, MAX_UPLOAD_SIZE)
@@ -100,7 +89,7 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 	service.DB.AddFile(destinationFile, "Audio file")
 
 	//	Record the event:
-	service.DB.AddEvent(event.FileUploaded, mediatype.Audio, fileHeader.Filename, time.Duration(int(historyttl)*24)*time.Hour)
+	service.DB.AddEvent(event.FileUploaded, mediatype.Audio, fileHeader.Filename, service.HistoryTTL)
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{
@@ -153,6 +142,9 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
+
+	//	Record the event:
+	service.DB.AddEvent(event.FileDeleted, mediatype.Audio, vars["id"], service.HistoryTTL)
 
 	//	Construct our response
 	response := SystemResponse{
@@ -214,6 +206,9 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 	}
 	service.PlayMedia <- playRequest
 
+	//	Record the event:
+	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), service.HistoryTTL)
+
 	//	Create our response and send information back:
 	response := SystemResponse{
 		Message: "Audio playing",
@@ -256,6 +251,9 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 		FilePath:  fileendpoint,
 	}
 	service.PlayMedia <- playRequest
+
+	//	Record the event:
+	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{
@@ -315,6 +313,9 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 	}
 	service.PlayMedia <- playRequest
 
+	//	Record the event:
+	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), service.HistoryTTL)
+
 	//	Create our response and send information back:
 	response := SystemResponse{
 		Message: "Audio playing",
@@ -340,6 +341,9 @@ func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Send to the channel:
 	service.StopMedia <- vars["pid"]
 
+	//	Record the event:
+	service.DB.AddEvent(event.RequestStop, mediatype.Audio, vars["pid"], service.HistoryTTL)
+
 	//	Create our response and send information back:
 	response := SystemResponse{
 		Message: "Audio stopping",
@@ -356,6 +360,9 @@ func (service Service) StopAllAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Send to the channel:
 	service.StopAllMedia <- true
+
+	//	Record the event:
+	service.DB.AddEvent(event.RequestStopAll, mediatype.Audio, "Stop all plays", service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{

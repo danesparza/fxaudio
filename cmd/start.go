@@ -6,13 +6,16 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/danesparza/fxaudio/api"
 	"github.com/danesparza/fxaudio/data"
+	"github.com/danesparza/fxaudio/event"
 	"github.com/danesparza/fxaudio/media"
+	"github.com/danesparza/fxaudio/mediatype"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
@@ -36,14 +39,27 @@ func start(cmd *cobra.Command, args []string) {
 		log.Println("[DEBUG] No config file found.")
 	}
 
-	//	Trap program exit appropriately
-	ctx, cancel := context.WithCancel(context.Background())
-	sigs := make(chan os.Signal, 2)
-	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
-	go handleSignals(ctx, sigs, cancel)
+	retentiondays := viper.GetString("datastore.retentiondays")
+	systemdb := viper.GetString("datastore.system")
+	uploadPath := viper.GetString("upload.path")
+	uploadByteLimit := viper.GetString("upload.upload.bytelimit")
+
+	//	Emit what we know:
+	log.Printf("[INFO] ************* CONFIG *************\n")
+	log.Printf("[INFO] System DB: %s\n", systemdb)
+	log.Printf("[INFO] History retention: %s days\n", retentiondays)
+	log.Printf("[INFO] Upload path: %s\n", uploadPath)
+	log.Printf("[INFO] Upload limit: %s bytes\n", uploadByteLimit)
+	log.Printf("[INFO] **************************\n")
+
+	//	Log the log retention (in days):
+	historyttl, err := strconv.Atoi(retentiondays)
+	if err != nil {
+		log.Fatalf("[ERROR] The datastore.retentiondays config is invalid: %s", err)
+	}
 
 	//	Create a DBManager object and associate with the api.Service
-	db, err := data.NewManager(viper.GetString("datastore.system"))
+	db, err := data.NewManager(systemdb)
 	if err != nil {
 		log.Printf("[ERROR] Error trying to open the system database: %s", err)
 		return
@@ -51,7 +67,27 @@ func start(cmd *cobra.Command, args []string) {
 	defer db.Close()
 
 	//	Create an api service object
-	apiService := api.Service{PlayMedia: make(chan media.PlayAudioRequest), StopMedia: make(chan string), StopAllMedia: make(chan bool), DB: db, StartTime: time.Now()}
+	apiService := api.Service{
+		PlayMedia:    make(chan media.PlayAudioRequest),
+		StopMedia:    make(chan string),
+		StopAllMedia: make(chan bool),
+		DB:           db,
+		StartTime:    time.Now(),
+		HistoryTTL:   time.Duration(int(historyttl)*24) * time.Hour,
+	}
+
+	//	Trap program exit appropriately
+	ctx, cancel := context.WithCancel(context.Background())
+	sigs := make(chan os.Signal, 2)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	go handleSignals(ctx, sigs, cancel, db, apiService.HistoryTTL)
+
+	//	Log that the system has started:
+	_, err = db.AddEvent(event.SystemStartup, mediatype.System, "System started", apiService.HistoryTTL)
+	if err != nil {
+		log.Fatalf("[ERROR] Error trying to log to the system datastore: %s", err)
+		return
+	}
 
 	//	Create a router and setup our REST endpoints...
 	restRouter := mux.NewRouter()
@@ -87,7 +123,8 @@ func start(cmd *cobra.Command, args []string) {
 	restRouter.HandleFunc("/v1/audio/stop/{pid}", apiService.StopAudio).Methods("POST") // Stop playing a file
 
 	//	EVENT ROUTES
-	//	/v1/events				//	List all events from the past n days
+	restRouter.HandleFunc("/v1/events", apiService.GetAllEvents).Methods("GET") // List all events
+	restRouter.HandleFunc("/v1/event/{id}", apiService.GetEvent).Methods("GET") // Get a specific log event
 
 	//	Start the media processor:
 	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia, apiService.StopAllMedia)
@@ -111,7 +148,7 @@ func start(cmd *cobra.Command, args []string) {
 	log.Printf("[ERROR] %v\n", http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter))
 }
 
-func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc) {
+func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc, db *data.Manager, historyttl time.Duration) {
 	select {
 	case <-ctx.Done():
 	case sig := <-sigs:
@@ -121,6 +158,13 @@ func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.Ca
 		case syscall.SIGTERM:
 			log.Println("[INFO] SIGTERM")
 		}
+
+		//	Log that the system has started:
+		_, err := db.AddEvent(event.SystemShutdown, mediatype.System, "System stopping", historyttl)
+		if err != nil {
+			log.Printf("[ERROR] Error trying to log to the system datastore: %s", err)
+		}
+
 		log.Println("[INFO] Shutting down ...")
 		cancel()
 		os.Exit(0)

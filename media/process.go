@@ -75,17 +75,18 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 		case <-stopallaudio:
 			//	Loop through all items in the map and call cancel if the item exists (critical section):
 			playingAudio.rwMutex.Lock()
-			/*
-				playCancel, exists := playingAudio.m[stopFile]
 
-				if exists {
-					//	Call the context cancellation function
-					playCancel()
+			for stopFile, playCancel := range playingAudio.m {
 
-					//	Remove ourselves from the map and exit
-					delete(playingAudio.m, stopFile)
-				}
-			*/
+				//	Call the cancel function
+				playCancel()
+
+				//	Remove ourselves from the map
+				//	(this is safe to do in a 'range':
+				//	https://golang.org/doc/effective_go#for )
+				delete(playingAudio.m, stopFile)
+			}
+
 			playingAudio.rwMutex.Unlock()
 
 		case <-systemctx.Done():

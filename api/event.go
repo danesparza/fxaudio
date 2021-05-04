@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -46,7 +47,7 @@ func (service Service) GetAllEvents(rw http.ResponseWriter, req *http.Request) {
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Events fetched",
+		Message: fmt.Sprintf("%v events", len(events)),
 		Data:    events,
 	}
 

@@ -115,7 +115,7 @@ func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 
 	//	Construct our response
 	response := SystemResponse{
-		Message: "File list",
+		Message: fmt.Sprintf("%v file(s)", len(retval)),
 		Data:    retval,
 	}
 

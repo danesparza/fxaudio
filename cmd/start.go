@@ -83,7 +83,7 @@ func start(cmd *cobra.Command, args []string) {
 	go handleSignals(ctx, sigs, cancel, db, apiService.HistoryTTL)
 
 	//	Log that the system has started:
-	_, err = db.AddEvent(event.SystemStartup, mediatype.System, "System started", apiService.HistoryTTL)
+	_, err = db.AddEvent(event.SystemStartup, mediatype.System, "System started", "", apiService.HistoryTTL)
 	if err != nil {
 		log.Fatalf("[ERROR] Error trying to log to the system datastore: %s", err)
 		return
@@ -140,7 +140,7 @@ func start(cmd *cobra.Command, args []string) {
 	//	Format the bound interface:
 	formattedServerInterface := viper.GetString("server.bind")
 	if formattedServerInterface == "" {
-		formattedServerInterface = "127.0.0.1"
+		formattedServerInterface = GetOutboundIP().String()
 	}
 
 	//	Start the API and UI services
@@ -160,7 +160,7 @@ func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.Ca
 		}
 
 		//	Log that the system has started:
-		_, err := db.AddEvent(event.SystemShutdown, mediatype.System, "System stopping", historyttl)
+		_, err := db.AddEvent(event.SystemShutdown, mediatype.System, "System stopping", "", historyttl)
 		if err != nil {
 			log.Printf("[ERROR] Error trying to log to the system datastore: %s", err)
 		}

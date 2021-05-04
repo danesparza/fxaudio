@@ -14,19 +14,21 @@ import (
 type Event struct {
 	ID        string    `json:"id"`        // Unique Event ID
 	Created   time.Time `json:"created"`   // Event creation time
+	SourceIP  string    `json:"ip"`        // Source IP address of the event
 	EventType string    `json:"eventtype"` // One of: System startup, File found, File processed, File error, System shutdown
 	MediaType string    `json:"mediatype"` // The type of media involved: TV / Movie / Music / System
 	Details   string    `json:"details"`   // Additional information (like the files involved)
 }
 
 // AddEvent adds an event to the system
-func (store Manager) AddEvent(eventtype, mediatype, details string, expiresafter time.Duration) (Event, error) {
+func (store Manager) AddEvent(eventtype, mediatype, details string, ip string, expiresafter time.Duration) (Event, error) {
 	//	Our return item
 	retval := Event{}
 
 	newEvent := Event{
 		ID:        xid.New().String(), // Generate a new id
 		Created:   time.Now(),
+		SourceIP:  ip,
 		EventType: eventtype,
 		MediaType: mediatype,
 		Details:   details,

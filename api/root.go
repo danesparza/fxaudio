@@ -59,3 +59,13 @@ func ShowUI(rw http.ResponseWriter, req *http.Request) {
 	// http.Redirect(rw, req, "/ui/", 301)
 	fmt.Fprintf(rw, "Hello, world - UI")
 }
+
+// GetIP gets a requests IP address by reading off the forwarded-for
+// header (for proxies) and falls back to use the remote address.
+func GetIP(r *http.Request) string {
+	forwarded := r.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return r.RemoteAddr
+}

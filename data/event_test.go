@@ -27,7 +27,7 @@ func TestEvent_AddEvent_ValidEvent_Successful(t *testing.T) {
 	testEvent := data.Event{EventType: event.SystemStartup, MediaType: "Test", Details: "Unit test details"}
 
 	//	Act
-	newEvent, err := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, 2*time.Hour)
+	newEvent, err := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, "127.0.0.1", 2*time.Hour)
 
 	//	Assert
 	if err != nil {
@@ -57,7 +57,7 @@ func TestEvent_GetEvent_ValidEvent_Successful(t *testing.T) {
 	testEvent := data.Event{EventType: event.SystemStartup, MediaType: mediatype.Unknown, Details: "Unit test details"}
 
 	//	Act
-	newEvent, _ := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, 2*time.Hour)
+	newEvent, _ := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, "127.0.0.1", 2*time.Hour)
 	gotEvent, err := db.GetEvent(newEvent.ID)
 
 	//	Assert
@@ -92,7 +92,7 @@ func TestEvent_GetEvent_ExpiredEvent_ReturnsError(t *testing.T) {
 	testEvent := data.Event{EventType: event.SystemStartup, MediaType: "Test", Details: "Unit test details"}
 
 	//	Act
-	newEvent, _ := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, 2*time.Second)
+	newEvent, _ := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, "127.0.0.1", 2*time.Second)
 
 	//	-- Wait for 5 seconds -- TTL should expire and the event should no longer be available:
 	time.Sleep(5 * time.Second)
@@ -125,9 +125,9 @@ func TestEvent_GetAllEvents_ValidEvents_Successful(t *testing.T) {
 	testEvent3 := data.Event{EventType: event.SystemStartup, MediaType: mediatype.Audio, Details: "Unit test 3 details"}
 
 	//	Act
-	db.AddEvent(testEvent1.EventType, testEvent1.MediaType, testEvent1.Details, 2*time.Hour)
-	newEvent2, _ := db.AddEvent(testEvent2.EventType, testEvent2.MediaType, testEvent2.Details, 2*time.Hour)
-	db.AddEvent(testEvent3.EventType, testEvent3.MediaType, testEvent3.Details, 2*time.Hour)
+	db.AddEvent(testEvent1.EventType, testEvent1.MediaType, testEvent1.Details, "127.0.0.1", 2*time.Hour)
+	newEvent2, _ := db.AddEvent(testEvent2.EventType, testEvent2.MediaType, testEvent2.Details, "127.0.0.1", 2*time.Hour)
+	db.AddEvent(testEvent3.EventType, testEvent3.MediaType, testEvent3.Details, "127.0.0.1", 2*time.Hour)
 	gotEvents, err := db.GetAllEvents()
 
 	//	Assert

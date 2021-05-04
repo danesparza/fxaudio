@@ -89,7 +89,7 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 	service.DB.AddFile(destinationFile, "Audio file")
 
 	//	Record the event:
-	service.DB.AddEvent(event.FileUploaded, mediatype.Audio, fileHeader.Filename, service.HistoryTTL)
+	service.DB.AddEvent(event.FileUploaded, mediatype.Audio, fileHeader.Filename, GetIP(req), service.HistoryTTL)
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{
@@ -144,7 +144,7 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	//	Record the event:
-	service.DB.AddEvent(event.FileDeleted, mediatype.Audio, vars["id"], service.HistoryTTL)
+	service.DB.AddEvent(event.FileDeleted, mediatype.Audio, vars["id"], GetIP(req), service.HistoryTTL)
 
 	//	Construct our response
 	response := SystemResponse{
@@ -207,7 +207,7 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 	service.PlayMedia <- playRequest
 
 	//	Record the event:
-	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), service.HistoryTTL)
+	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), GetIP(req), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{
@@ -253,7 +253,7 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 	service.PlayMedia <- playRequest
 
 	//	Record the event:
-	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), service.HistoryTTL)
+	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), GetIP(req), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{
@@ -314,7 +314,7 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 	service.PlayMedia <- playRequest
 
 	//	Record the event:
-	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), service.HistoryTTL)
+	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), GetIP(req), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{
@@ -342,7 +342,7 @@ func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 	service.StopMedia <- vars["pid"]
 
 	//	Record the event:
-	service.DB.AddEvent(event.RequestStop, mediatype.Audio, vars["pid"], service.HistoryTTL)
+	service.DB.AddEvent(event.RequestStop, mediatype.Audio, vars["pid"], GetIP(req), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{
@@ -362,7 +362,7 @@ func (service Service) StopAllAudio(rw http.ResponseWriter, req *http.Request) {
 	service.StopAllMedia <- true
 
 	//	Record the event:
-	service.DB.AddEvent(event.RequestStopAll, mediatype.Audio, "Stop all plays", service.HistoryTTL)
+	service.DB.AddEvent(event.RequestStopAll, mediatype.Audio, "Stop all plays", GetIP(req), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{

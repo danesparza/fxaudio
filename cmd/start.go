@@ -13,6 +13,7 @@ import (
 
 	"github.com/danesparza/fxaudio/api"
 	"github.com/danesparza/fxaudio/data"
+	_ "github.com/danesparza/fxaudio/docs" // swagger docs location
 	"github.com/danesparza/fxaudio/event"
 	"github.com/danesparza/fxaudio/media"
 	"github.com/danesparza/fxaudio/mediatype"
@@ -20,6 +21,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	httpSwagger "github.com/swaggo/http-swagger" // http-swagger middleware
 )
 
 // startCmd represents the start command
@@ -42,7 +44,7 @@ func start(cmd *cobra.Command, args []string) {
 	retentiondays := viper.GetString("datastore.retentiondays")
 	systemdb := viper.GetString("datastore.system")
 	uploadPath := viper.GetString("upload.path")
-	uploadByteLimit := viper.GetString("upload.upload.bytelimit")
+	uploadByteLimit := viper.GetString("upload.bytelimit")
 
 	//	Emit what we know:
 	log.Printf("[INFO] ************* CONFIG *************\n")
@@ -126,6 +128,9 @@ func start(cmd *cobra.Command, args []string) {
 	restRouter.HandleFunc("/v1/events", apiService.GetAllEvents).Methods("GET") // List all events
 	restRouter.HandleFunc("/v1/event/{id}", apiService.GetEvent).Methods("GET") // Get a specific log event
 
+	//	SWAGGER ROUTES
+	restRouter.PathPrefix("/v1/swagger").Handler(httpSwagger.WrapHandler)
+
 	//	Start the media processor:
 	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia, apiService.StopAllMedia)
 
@@ -143,8 +148,8 @@ func start(cmd *cobra.Command, args []string) {
 		formattedServerInterface = GetOutboundIP().String()
 	}
 
-	//	Start the API and UI services
-	log.Printf("[INFO] Starting Management UI: http://%s:%s/ui/\n", formattedServerInterface, viper.GetString("server.port"))
+	//	Start the service and display how to access it
+	log.Printf("[INFO] REST service documentation: http://%s:%s/v1/swagger/\n", formattedServerInterface, viper.GetString("server.port"))
 	log.Printf("[ERROR] %v\n", http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter))
 }
 

@@ -19,20 +19,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-/*
-
-/audio
-PUT - Upload file
-GET - List all files
-POST - Play a random file (or if passed an endpoint in JSON, stream that file)
-
-/audio/1
-GET - Download file
-POST - Play file
-DELETE - Delete file
-
-*/
-
+// UploadFile godoc
+// @Summary Upload a file
+// @Description Upload file
+// @Tags audio
+// @Accept  mpfd
+// @Produce  json
+// @Param file formData file true "The file to upload"
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Failure 413 {object} api.ErrorResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Router /audio [put]
 func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 
 	MAX_UPLOAD_SIZE := viper.GetInt64("upload.bytelimit")
@@ -102,7 +100,15 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-//	ListAllFiles lists all files in the system
+// ListAllFiles godoc
+// @Summary List all files in the system
+// @Description List all files in the system
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} api.SystemResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Router /audio [get]
 func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get a list of files
@@ -124,7 +130,18 @@ func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-//	DeleteFile deletes a file in the system
+// DeleteFile godoc
+// @Summary Deletes a file in the system
+// @Description Deletes a file in the system
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Param id query string true "The file id to delete"
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Failure 503 {object} api.ErrorResponse
+// @Router /audio/{id} [delete]
 func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
@@ -157,7 +174,18 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-// PlayAudio plays an audio file
+// PlayAudio godoc
+// @Summary Play an audio file
+// @Description Play an audio file
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Param id query string true "The file id to play"
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Failure 503 {object} api.ErrorResponse
+// @Router /audio/play/{id} [post]
 func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
@@ -220,7 +248,17 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-// StreamAudio plays an audio endpoint
+// StreamAudio godoc
+// @Summary Stream from an audio endpoint
+// @Description Stream from an audio endpoint
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Param endpoint body api.PlayAudioRequest true "The endpoint url to stream"
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Failure 503 {object} api.ErrorResponse
+// @Router /audio/stream [post]
 func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	req.Body is a ReadCloser -- we need to remember to close it:
@@ -266,7 +304,16 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-// PlayAudio plays an audio endpoint or a random file already uploaded
+// PlayRandomAudio godoc
+// @Summary Play a random file already uploaded
+// @Description Play a random file already uploaded
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Router /audio/play [post]
 func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	req.Body is a ReadCloser -- we need to remember to close it:
@@ -327,7 +374,16 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 	json.NewEncoder(rw).Encode(response)
 }
 
-// StopAudio stops an audio file 'play' process
+// StopAudio godoc
+// @Summary Stops a specific audio file 'play' process
+// @Description Stops a specific audio file 'play' process
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Param id query string true "The process id to stop"
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Router /audio/stop/{pid} [post]
 func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
@@ -355,7 +411,14 @@ func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-// StopAllAudio stops all audio 'play' processes
+// StopAllAudio godoc
+// @Summary Stops all audio 'play' processes
+// @Description Stops all audio 'play' processes
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} api.SystemResponse
+// @Router /audio/stop [post]
 func (service Service) StopAllAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Send to the channel:

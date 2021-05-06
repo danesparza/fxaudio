@@ -1,0 +1,239 @@
+basePath: /v1
+definitions:
+  api.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  api.PlayAudioRequest:
+    properties:
+      endpoint:
+        type: string
+    type: object
+  api.SystemResponse:
+    properties:
+      data:
+        type: object
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: fxAudio multichannel audio REST service
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: fxAudio
+  version: "1.0"
+paths:
+  /audio:
+    get:
+      consumes:
+      - application/json
+      description: List all files in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List all files in the system
+      tags:
+      - audio
+    put:
+      consumes:
+      - multipart/form-data
+      description: Upload file
+      parameters:
+      - description: The file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Upload a file
+      tags:
+      - audio
+  /audio/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a file in the system
+      parameters:
+      - description: The file id to delete
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Deletes a file in the system
+      tags:
+      - audio
+  /audio/play:
+    post:
+      consumes:
+      - application/json
+      description: Play a random file already uploaded
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Play a random file already uploaded
+      tags:
+      - audio
+  /audio/play/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Play an audio file
+      parameters:
+      - description: The file id to play
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Play an audio file
+      tags:
+      - audio
+  /audio/stop:
+    post:
+      consumes:
+      - application/json
+      description: Stops all audio 'play' processes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+      summary: Stops all audio 'play' processes
+      tags:
+      - audio
+  /audio/stop/{pid}:
+    post:
+      consumes:
+      - application/json
+      description: Stops a specific audio file 'play' process
+      parameters:
+      - description: The process id to stop
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Stops a specific audio file 'play' process
+      tags:
+      - audio
+  /audio/stream:
+    post:
+      consumes:
+      - application/json
+      description: Stream from an audio endpoint
+      parameters:
+      - description: The endpoint url to stream
+        in: body
+        name: endpoint
+        required: true
+        schema:
+          $ref: '#/definitions/api.PlayAudioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Stream from an audio endpoint
+      tags:
+      - audio
+swagger: "2.0"

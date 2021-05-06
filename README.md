@@ -21,3 +21,5 @@ sudo dpkg -i fxaudio-1.0.40_armhf.deb
 This automatically installs the **fxaudio** service with a default configuration and starts the service. 
 
 You can then use the service at http://localhost:3030
+
+See the REST API documentation at http://localhost:3030/v1/swagger/

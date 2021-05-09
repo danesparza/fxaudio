@@ -5,6 +5,8 @@ Description=fxAudio service
 User=root
 Group=root
 ExecStart=/usr/bin/fxaudio start --config=/etc/fxaudio/config.yaml
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target

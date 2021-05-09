@@ -84,7 +84,7 @@ paths:
       description: Deletes a file in the system
       parameters:
       - description: The file id to delete
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -140,7 +140,7 @@ paths:
       description: Play an audio file
       parameters:
       - description: The file id to play
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -188,7 +188,7 @@ paths:
       description: Stops a specific audio file 'play' process
       parameters:
       - description: The process id to stop
-        in: query
+        in: path
         name: id
         required: true
         type: string

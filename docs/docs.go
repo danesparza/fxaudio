@@ -158,7 +158,7 @@ var doc = `{
                         "type": "string",
                         "description": "The file id to play",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -231,7 +231,7 @@ var doc = `{
                         "type": "string",
                         "description": "The process id to stop",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -315,7 +315,7 @@ var doc = `{
                         "type": "string",
                         "description": "The file id to delete",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],

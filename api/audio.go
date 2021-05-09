@@ -136,7 +136,7 @@ func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 // @Tags audio
 // @Accept  json
 // @Produce  json
-// @Param id query string true "The file id to delete"
+// @Param id path string true "The file id to delete"
 // @Success 200 {object} api.SystemResponse
 // @Failure 400 {object} api.ErrorResponse
 // @Failure 500 {object} api.ErrorResponse
@@ -180,7 +180,7 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 // @Tags audio
 // @Accept  json
 // @Produce  json
-// @Param id query string true "The file id to play"
+// @Param id path string true "The file id to play"
 // @Success 200 {object} api.SystemResponse
 // @Failure 400 {object} api.ErrorResponse
 // @Failure 500 {object} api.ErrorResponse
@@ -380,7 +380,7 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 // @Tags audio
 // @Accept  json
 // @Produce  json
-// @Param id query string true "The process id to stop"
+// @Param id path string true "The process id to stop"
 // @Success 200 {object} api.SystemResponse
 // @Failure 400 {object} api.ErrorResponse
 // @Router /audio/stop/{pid} [post]

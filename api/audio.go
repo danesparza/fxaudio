@@ -380,7 +380,7 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 // @Tags audio
 // @Accept  json
 // @Produce  json
-// @Param id path string true "The process id to stop"
+// @Param pid path string true "The process id to stop"
 // @Success 200 {object} api.SystemResponse
 // @Failure 400 {object} api.ErrorResponse
 // @Router /audio/stop/{pid} [post]

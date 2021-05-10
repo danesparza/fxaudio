@@ -230,7 +230,7 @@ var doc = `{
                     {
                         "type": "string",
                         "description": "The process id to stop",
-                        "name": "id",
+                        "name": "pid",
                         "in": "path",
                         "required": true
                     }

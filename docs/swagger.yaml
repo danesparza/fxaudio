@@ -189,7 +189,7 @@ paths:
       parameters:
       - description: The process id to stop
         in: path
-        name: id
+        name: pid
         required: true
         type: string
       produces:

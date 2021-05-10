@@ -8,7 +8,7 @@ fxaudio uses [mpg123](https://en.wikipedia.org/wiki/Mpg123) under the hood to pl
 sudo apt-get install -y mpg123
 ```
 
-I would recommend using the [Adafruit Speaker Bonnet for Raspberry Pi](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview) as well -- just get a [Pi with headers](https://www.adafruit.com/product/3708) and slide the bonnet right down on top of it.  I used a pair of [8 ohm 3" speakers](https://www.adafruit.com/product/1313) with the bonnet. 
+I would recommend using the [Adafruit Speaker Bonnet for Raspberry Pi](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview) as well -- just get a [Pi with headers](https://www.adafruit.com/product/3708) and slide the bonnet right down on top of it (and be sure to follow the [Raspberry Pi OS configuration instructions](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-usage) for the board).  I used a pair of [8 ohm 3" speakers](https://www.adafruit.com/product/1313) with the bonnet. 
 
 ## Installing
 Installing fxaudio is also really simple.  Grab the .deb file from the [latest release](https://github.com/danesparza/fxaudio/releases/latest) and then install it using dpkg:

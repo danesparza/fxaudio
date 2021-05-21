@@ -8,7 +8,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// GetEvent gets a log event.
+// GetEvent godoc
+// @Summary Gets a log event.
+// @Description Gets a log event.
+// @Tags events
+// @Accept  json
+// @Produce  json
+// @Param id path string true "The event id to get"
+// @Success 200 {object} api.SystemResponse
+// @Failure 404 {object} api.ErrorResponse
+// @Router /event/{id} [post]
 func (service Service) GetEvent(rw http.ResponseWriter, req *http.Request) {
 
 	//	Parse the request
@@ -32,7 +41,15 @@ func (service Service) GetEvent(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-// GetAllEvents gets all events in the system.
+// GetAllEvents godoc
+// @Summary Gets all events in the system
+// @Description Gets all events in the system
+// @Tags events
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} api.SystemResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Router /events [get]
 func (service Service) GetAllEvents(rw http.ResponseWriter, req *http.Request) {
 
 	//	req.Body is a ReadCloser -- we need to remember to close it:

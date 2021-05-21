@@ -236,4 +236,48 @@ paths:
       summary: Stream from an audio endpoint
       tags:
       - audio
+  /event/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Gets a log event.
+      parameters:
+      - description: The event id to get
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Gets a log event.
+      tags:
+      - events
+  /events:
+    get:
+      consumes:
+      - application/json
+      description: Gets all events in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Gets all events in the system
+      tags:
+      - events
 swagger: "2.0"

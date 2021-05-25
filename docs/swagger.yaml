@@ -237,7 +237,7 @@ paths:
       tags:
       - audio
   /event/{id}:
-    post:
+    get:
       consumes:
       - application/json
       description: Gets a log event.

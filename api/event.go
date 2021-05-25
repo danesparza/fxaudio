@@ -17,7 +17,7 @@ import (
 // @Param id path string true "The event id to get"
 // @Success 200 {object} api.SystemResponse
 // @Failure 404 {object} api.ErrorResponse
-// @Router /event/{id} [post]
+// @Router /event/{id} [get]
 func (service Service) GetEvent(rw http.ResponseWriter, req *http.Request) {
 
 	//	Parse the request

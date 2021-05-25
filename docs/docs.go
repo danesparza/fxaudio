@@ -348,7 +348,7 @@ var doc = `{
             }
         },
         "/event/{id}": {
-            "post": {
+            "get": {
                 "description": "Gets a log event.",
                 "consumes": [
                     "application/json"

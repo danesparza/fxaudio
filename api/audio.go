@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/danesparza/fxaudio/event"
 	"github.com/danesparza/fxaudio/media"
@@ -339,6 +340,7 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 		}
 
 		//	Pick a random file:
+		rand.Seed(time.Now().UnixNano())
 		randomIndex := rand.Intn(len(retval))
 
 		//	Set fileendpoint to the random file's path:

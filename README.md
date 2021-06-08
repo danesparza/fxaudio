@@ -5,6 +5,7 @@ REST service for multichannel audio on demand from Raspberry Pi.  Made with ‚ù§Ô
 fxaudio uses [mpg123](https://en.wikipedia.org/wiki/Mpg123) under the hood to play audio, so you'll need to make sure it's installed first.  Lucky for you, installation is really simple:
 
 ```bash
+sudo apt-get update
 sudo apt-get install -y mpg123
 ```
 

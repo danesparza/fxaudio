@@ -31,3 +31,6 @@ Uninstalling is just as simple:
 ```bash
 sudo dpkg -r fxaudio
 ````
+
+## Example hardware setup
+![fxAudio example hardware setup](fxAudio_hardware_annotated.png)

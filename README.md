@@ -1,4 +1,5 @@
 # fxaudio [![CircleCI](https://circleci.com/gh/danesparza/fxaudio.svg?style=shield)](https://circleci.com/gh/danesparza/fxaudio)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdanesparza%2Ffxaudio.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdanesparza%2Ffxaudio?ref=badge_shield)
 REST service for multichannel audio on demand from Raspberry Pi.  Made with ❤️ for makers, DIY craftsmen, and professional soundstage designers everywhere
 
 ## Prerequisites
@@ -34,3 +35,7 @@ sudo dpkg -r fxaudio
 
 ## Example hardware setup
 ![fxAudio example hardware setup](fxAudio_hardware_annotated.png)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdanesparza%2Ffxaudio.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdanesparza%2Ffxaudio?ref=badge_large)

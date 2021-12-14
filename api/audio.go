@@ -1,16 +1,17 @@
 package api
 
 import (
+	crypto_rand "crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
+	math_rand "math/rand"
 	"net/http"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/danesparza/fxaudio/event"
 	"github.com/danesparza/fxaudio/media"
@@ -340,8 +341,7 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 		}
 
 		//	Pick a random file:
-		rand.Seed(time.Now().UnixNano())
-		randomIndex := rand.Intn(len(retval))
+		randomIndex := math_rand.Intn(len(retval))
 
 		//	Set fileendpoint to the random file's path:
 		fileendpoint = retval[randomIndex].FilePath
@@ -438,4 +438,10 @@ func (service Service) StopAllAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Serialize to JSON & return the response:
 	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(rw).Encode(response)
+}
+
+func init() {
+	var b [8]byte
+	crypto_rand.Read(b[:])
+	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
 }

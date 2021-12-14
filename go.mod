@@ -25,6 +25,7 @@ require (
 	github.com/swaggo/http-swagger v1.0.0 // indirect
 	github.com/swaggo/swag v1.7.0
 	github.com/tidwall/buntdb v1.2.3 // indirect
+	github.com/tidwall/gjson v1.12.1 // indirect
 	github.com/urfave/cli v1.20.0 // indirect
 	golang.org/x/net v0.0.0-20210504132125-bbd867fde50d // indirect
 	golang.org/x/sys v0.0.0-20210503173754-0981d6026fa6 // indirect

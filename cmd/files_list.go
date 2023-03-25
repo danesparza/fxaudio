@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/danesparza/fxaudio/internal/data"
 	"log"
 
-	"github.com/danesparza/fxaudio/data"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

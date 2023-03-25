@@ -1,10 +1,9 @@
 package data_test
 
 import (
+	data2 "github.com/danesparza/fxaudio/internal/data"
 	"os"
 	"testing"
-
-	"github.com/danesparza/fxaudio/data"
 )
 
 func TestFile_AddFile_ValidFile_Successful(t *testing.T) {
@@ -12,7 +11,7 @@ func TestFile_AddFile_ValidFile_Successful(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -21,7 +20,7 @@ func TestFile_AddFile_ValidFile_Successful(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testFile := data.File{FilePath: "crossbones1.mp3", Description: "Unit test file"}
+	testFile := data2.File{FilePath: "crossbones1.mp3", Description: "Unit test file"}
 
 	//	Act
 	newFile, err := db.AddFile(testFile.FilePath, testFile.Description)
@@ -42,7 +41,7 @@ func TestFile_GetFile_ValidFile_Successful(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -51,9 +50,9 @@ func TestFile_GetFile_ValidFile_Successful(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testFile1 := data.File{FilePath: "crossbones1.mp3", Description: "Unit test 1 file"}
-	testFile2 := data.File{FilePath: "crossbones2.mp3", Description: "Unit test 2 file"}
-	testFile3 := data.File{FilePath: "crossbones3.mp3", Description: "Unit test 3 file"}
+	testFile1 := data2.File{FilePath: "crossbones1.mp3", Description: "Unit test 1 file"}
+	testFile2 := data2.File{FilePath: "crossbones2.mp3", Description: "Unit test 2 file"}
+	testFile3 := data2.File{FilePath: "crossbones3.mp3", Description: "Unit test 3 file"}
 
 	//	Act
 	db.AddFile(testFile1.FilePath, testFile1.Description)
@@ -80,7 +79,7 @@ func TestFile_GetAllFiles_ValidFiles_Successful(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -89,9 +88,9 @@ func TestFile_GetAllFiles_ValidFiles_Successful(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testFile1 := data.File{FilePath: "crossbones1.mp3", Description: "Unit test 1 file"}
-	testFile2 := data.File{FilePath: "crossbones2.mp3", Description: "Unit test 2 file"}
-	testFile3 := data.File{FilePath: "crossbones3.mp3", Description: "Unit test 3 file"}
+	testFile1 := data2.File{FilePath: "crossbones1.mp3", Description: "Unit test 1 file"}
+	testFile2 := data2.File{FilePath: "crossbones2.mp3", Description: "Unit test 2 file"}
+	testFile3 := data2.File{FilePath: "crossbones3.mp3", Description: "Unit test 3 file"}
 
 	//	Act
 	db.AddFile(testFile1.FilePath, testFile1.Description)
@@ -119,7 +118,7 @@ func TestFile_DeleteFile_ValidFiles_Successful(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -128,9 +127,9 @@ func TestFile_DeleteFile_ValidFiles_Successful(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testFile1 := data.File{FilePath: "crossbones1.mp3", Description: "Unit test 1 file"}
-	testFile2 := data.File{FilePath: "crossbones2.mp3", Description: "Unit test 2 file"}
-	testFile3 := data.File{FilePath: "crossbones3.mp3", Description: "Unit test 3 file"}
+	testFile1 := data2.File{FilePath: "crossbones1.mp3", Description: "Unit test 1 file"}
+	testFile2 := data2.File{FilePath: "crossbones2.mp3", Description: "Unit test 2 file"}
+	testFile3 := data2.File{FilePath: "crossbones3.mp3", Description: "Unit test 3 file"}
 
 	//	Act
 	db.AddFile(testFile1.FilePath, testFile1.Description)

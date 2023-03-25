@@ -3,11 +3,10 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/danesparza/fxaudio/internal/data"
+	"github.com/danesparza/fxaudio/internal/media"
 	"net/http"
 	"time"
-
-	"github.com/danesparza/fxaudio/data"
-	"github.com/danesparza/fxaudio/media"
 )
 
 // Service encapsulates API service operations
@@ -42,7 +41,7 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-//	Used to send back an error:
+// Used to send back an error:
 func sendErrorResponse(rw http.ResponseWriter, err error, code int) {
 	//	Our return value
 	response := ErrorResponse{

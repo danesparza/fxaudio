@@ -2,6 +2,10 @@ package cmd
 
 import (
 	"context"
+	"github.com/danesparza/fxaudio/internal/data"
+	"github.com/danesparza/fxaudio/internal/event"
+	"github.com/danesparza/fxaudio/internal/media"
+	"github.com/danesparza/fxaudio/internal/mediatype"
 	"log"
 	"net/http"
 	"os"
@@ -12,11 +16,7 @@ import (
 	"time"
 
 	"github.com/danesparza/fxaudio/api"
-	"github.com/danesparza/fxaudio/data"
 	_ "github.com/danesparza/fxaudio/docs" // swagger docs location
-	"github.com/danesparza/fxaudio/event"
-	"github.com/danesparza/fxaudio/media"
-	"github.com/danesparza/fxaudio/mediatype"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"

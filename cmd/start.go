@@ -101,6 +101,7 @@ func start(cmd *cobra.Command, args []string) {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5))
+	r.Use(api.ApiVersionMiddleware)
 
 	//	... including CORS middleware
 	r.Use(cors.Handler(cors.Options{

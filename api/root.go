@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/fxaudio/internal/data"
 	"github.com/danesparza/fxaudio/internal/media"
+	"github.com/danesparza/fxaudio/version"
 	"net/http"
 	"time"
 )
@@ -67,4 +68,15 @@ func GetIP(r *http.Request) string {
 		return forwarded
 	}
 	return r.RemoteAddr
+}
+
+// ApiVersionMiddleware adds the API version information to the response header
+func ApiVersionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		//	Include the version in the response headers:
+		rw.Header().Set(version.Header, version.String())
+
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(rw, r)
+	})
 }

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"github.com/rs/zerolog/log"
 	"net"
 	"os"
 	"path"
@@ -84,7 +84,7 @@ func initConfig() {
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("Problem getting outbound IP")
 	}
 	defer conn.Close()
 

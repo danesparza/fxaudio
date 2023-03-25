@@ -8,6 +8,7 @@ import (
 	"github.com/danesparza/fxaudio/internal/event"
 	"github.com/danesparza/fxaudio/internal/media"
 	"github.com/danesparza/fxaudio/internal/mediatype"
+	"github.com/go-chi/chi/v5"
 	"io"
 	math_rand "math/rand"
 	"net/http"
@@ -16,7 +17,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/gorilla/mux"
 	"github.com/rs/xid"
 	"github.com/spf13/viper"
 )
@@ -147,15 +147,16 @@ func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
-	vars := mux.Vars(req)
-	if vars["id"] == "" {
+	audioId := chi.URLParam(req, "id")
+
+	if audioId == "" {
 		err := fmt.Errorf("requires an id of a file to delete")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
 
 	//	Delete the file
-	err := service.DB.DeleteFile(vars["id"])
+	err := service.DB.DeleteFile(audioId)
 	if err != nil {
 		err = fmt.Errorf("error deleting file: %v", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
@@ -163,12 +164,12 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	//	Record the event:
-	service.DB.AddEvent(event.FileDeleted, mediatype.Audio, vars["id"], GetIP(req), service.HistoryTTL)
+	service.DB.AddEvent(event.FileDeleted, mediatype.Audio, audioId, GetIP(req), service.HistoryTTL)
 
 	//	Construct our response
 	response := SystemResponse{
 		Message: "File deleted",
-		Data:    vars["id"],
+		Data:    audioId,
 	}
 
 	//	Serialize to JSON & return the response:
@@ -191,15 +192,15 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
-	vars := mux.Vars(req)
-	if vars["id"] == "" {
+	audioId := chi.URLParam(req, "id")
+	if audioId == "" {
 		err := fmt.Errorf("requires an id of a file to play")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
 
 	//	Get the file information
-	fileToPlay, err := service.DB.GetFile(vars["id"])
+	fileToPlay, err := service.DB.GetFile(audioId)
 	if err != nil {
 		err = fmt.Errorf("error getting file information: %v", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
@@ -389,23 +390,23 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
-	vars := mux.Vars(req)
-	if vars["pid"] == "" {
+	processId := chi.URLParam(req, "pid")
+	if processId == "" {
 		err := fmt.Errorf("requires a processid of a process to stop")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
 
 	//	Send to the channel:
-	service.StopMedia <- vars["pid"]
+	service.StopMedia <- processId
 
 	//	Record the event:
-	service.DB.AddEvent(event.RequestStop, mediatype.Audio, vars["pid"], GetIP(req), service.HistoryTTL)
+	service.DB.AddEvent(event.RequestStop, mediatype.Audio, processId, GetIP(req), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{
 		Message: "Audio stopping",
-		Data:    vars["pid"],
+		Data:    processId,
 	}
 
 	//	Serialize to JSON & return the response:

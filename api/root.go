@@ -3,11 +3,11 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/danesparza/fxaudio/internal/data"
+	"github.com/danesparza/fxaudio/internal/media"
+	"github.com/danesparza/fxaudio/version"
 	"net/http"
 	"time"
-
-	"github.com/danesparza/fxaudio/data"
-	"github.com/danesparza/fxaudio/media"
 )
 
 // Service encapsulates API service operations
@@ -42,7 +42,7 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-//	Used to send back an error:
+// Used to send back an error:
 func sendErrorResponse(rw http.ResponseWriter, err error, code int) {
 	//	Our return value
 	response := ErrorResponse{
@@ -68,4 +68,15 @@ func GetIP(r *http.Request) string {
 		return forwarded
 	}
 	return r.RemoteAddr
+}
+
+// ApiVersionMiddleware adds the API version information to the response header
+func ApiVersionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		//	Include the version in the response headers:
+		rw.Header().Set(version.Header, version.String())
+
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(rw, r)
+	})
 }

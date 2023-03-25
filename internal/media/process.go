@@ -8,9 +8,10 @@ import (
 )
 
 type PlayAudioRequest struct {
-	ProcessID string `json:"pid"`      // Unique Internal Process ID
-	ID        string `json:"id"`       // Unique File ID
-	FilePath  string `json:"filepath"` // Full filepath to the file
+	ProcessID string `json:"pid"`       // Unique Internal Process ID
+	ID        string `json:"id"`        // Unique File ID
+	FilePath  string `json:"filepath"`  // Full filepath to the file
+	LoopTimes string `json:"looptimes"` // Number of times to loop.  Default: 1 (only play once)
 }
 
 type audioProcessMap struct {
@@ -44,7 +45,7 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 				playingAudio.rwMutex.Unlock()
 
 				//	Create the command with context and play the audio
-				playCommand := exec.CommandContext(ctx, "mpg123", playReq.FilePath)
+				playCommand := exec.CommandContext(ctx, "mpg123", "--loop", playReq.LoopTimes, playReq.FilePath)
 
 				if err := playCommand.Run(); err != nil {
 					//	Log an error playing a file

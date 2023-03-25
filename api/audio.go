@@ -5,6 +5,10 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/danesparza/fxaudio/internal/event"
+	"github.com/danesparza/fxaudio/internal/media"
+	"github.com/danesparza/fxaudio/internal/mediatype"
+	"github.com/go-chi/chi/v5"
 	"io"
 	math_rand "math/rand"
 	"net/http"
@@ -13,10 +17,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/danesparza/fxaudio/event"
-	"github.com/danesparza/fxaudio/media"
-	"github.com/danesparza/fxaudio/mediatype"
-	"github.com/gorilla/mux"
 	"github.com/rs/xid"
 	"github.com/spf13/viper"
 )
@@ -147,15 +147,16 @@ func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
-	vars := mux.Vars(req)
-	if vars["id"] == "" {
+	audioId := chi.URLParam(req, "id")
+
+	if audioId == "" {
 		err := fmt.Errorf("requires an id of a file to delete")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
 
 	//	Delete the file
-	err := service.DB.DeleteFile(vars["id"])
+	err := service.DB.DeleteFile(audioId)
 	if err != nil {
 		err = fmt.Errorf("error deleting file: %v", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
@@ -163,12 +164,12 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	//	Record the event:
-	service.DB.AddEvent(event.FileDeleted, mediatype.Audio, vars["id"], GetIP(req), service.HistoryTTL)
+	service.DB.AddEvent(event.FileDeleted, mediatype.Audio, audioId, GetIP(req), service.HistoryTTL)
 
 	//	Construct our response
 	response := SystemResponse{
 		Message: "File deleted",
-		Data:    vars["id"],
+		Data:    audioId,
 	}
 
 	//	Serialize to JSON & return the response:
@@ -191,15 +192,15 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
-	vars := mux.Vars(req)
-	if vars["id"] == "" {
+	audioId := chi.URLParam(req, "id")
+	if audioId == "" {
 		err := fmt.Errorf("requires an id of a file to play")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
 
 	//	Get the file information
-	fileToPlay, err := service.DB.GetFile(vars["id"])
+	fileToPlay, err := service.DB.GetFile(audioId)
 	if err != nil {
 		err = fmt.Errorf("error getting file information: %v", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
@@ -233,6 +234,78 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		ProcessID: xid.New().String(), // Generate a new id
 		ID:        fileToPlay.ID,
 		FilePath:  fileToPlay.FilePath,
+		LoopTimes: "1",
+	}
+	service.PlayMedia <- playRequest
+
+	//	Record the event:
+	service.DB.AddEvent(event.RequestPlay, mediatype.Audio, fmt.Sprintf("%+v", playRequest), GetIP(req), service.HistoryTTL)
+
+	//	Create our response and send information back:
+	response := SystemResponse{
+		Message: "Audio playing",
+		Data:    playRequest,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
+// LoopAudio godoc
+// @Summary Loop an audio file n times
+// @Description Play an audio file over and over.  (-1 to loop until stopped)
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Param id path string true "The file id to play"
+// @Param loopTimes path string true "The number of times to play. The value -1 will cause it to loop until stopped"
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Failure 503 {object} api.ErrorResponse
+// @Router /audio/loop/{id}/{loopTimes} [post]
+func (service Service) LoopAudio(rw http.ResponseWriter, req *http.Request) {
+
+	//	Get the id from the url (if it's blank, return an error)
+	audioId := chi.URLParam(req, "id")
+	if audioId == "" {
+		err := fmt.Errorf("requires an id of a file to loop")
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	loopTimes := chi.URLParam(req, "loopTimes")
+	if audioId == "" {
+		err := fmt.Errorf("requires a number of times to loop")
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Get the file information
+	fileToPlay, err := service.DB.GetFile(audioId)
+	if err != nil {
+		err = fmt.Errorf("error getting file information: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
+	//	Instructions on how to install it:
+	//	https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-test
+	_, err = exec.LookPath("mpg123")
+	if err != nil {
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+		return
+	}
+
+	//	Send to the channel:
+	playRequest := media.PlayAudioRequest{
+		ProcessID: xid.New().String(), // Generate a new id
+		ID:        fileToPlay.ID,
+		FilePath:  fileToPlay.FilePath,
+		LoopTimes: loopTimes,
 	}
 	service.PlayMedia <- playRequest
 
@@ -289,6 +362,7 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 	playRequest := media.PlayAudioRequest{
 		ProcessID: xid.New().String(), // Generate a new id
 		FilePath:  fileendpoint,
+		LoopTimes: "1",
 	}
 	service.PlayMedia <- playRequest
 
@@ -359,6 +433,7 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 	playRequest := media.PlayAudioRequest{
 		ProcessID: xid.New().String(), // Generate a new id
 		FilePath:  fileendpoint,
+		LoopTimes: "1",
 	}
 	service.PlayMedia <- playRequest
 
@@ -389,23 +464,23 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 func (service Service) StopAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
-	vars := mux.Vars(req)
-	if vars["pid"] == "" {
+	processId := chi.URLParam(req, "pid")
+	if processId == "" {
 		err := fmt.Errorf("requires a processid of a process to stop")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
 
 	//	Send to the channel:
-	service.StopMedia <- vars["pid"]
+	service.StopMedia <- processId
 
 	//	Record the event:
-	service.DB.AddEvent(event.RequestStop, mediatype.Audio, vars["pid"], GetIP(req), service.HistoryTTL)
+	service.DB.AddEvent(event.RequestStop, mediatype.Audio, processId, GetIP(req), service.HistoryTTL)
 
 	//	Create our response and send information back:
 	response := SystemResponse{
 		Message: "Audio stopping",
-		Data:    vars["pid"],
+		Data:    processId,
 	}
 
 	//	Serialize to JSON & return the response:

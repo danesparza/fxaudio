@@ -3,9 +3,8 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // GetEvent godoc
@@ -21,10 +20,10 @@ import (
 func (service Service) GetEvent(rw http.ResponseWriter, req *http.Request) {
 
 	//	Parse the request
-	vars := mux.Vars(req)
+	eventId := chi.URLParam(req, "id")
 
 	//	Perform the action with the context user
-	dataResponse, err := service.DB.GetEvent(vars["id"])
+	dataResponse, err := service.DB.GetEvent(eventId)
 	if err != nil {
 		sendErrorResponse(rw, err, http.StatusNotFound)
 		return

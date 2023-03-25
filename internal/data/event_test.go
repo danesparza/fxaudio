@@ -1,13 +1,12 @@
 package data_test
 
 import (
+	data2 "github.com/danesparza/fxaudio/internal/data"
+	"github.com/danesparza/fxaudio/internal/event"
+	"github.com/danesparza/fxaudio/internal/mediatype"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/danesparza/fxaudio/data"
-	"github.com/danesparza/fxaudio/event"
-	"github.com/danesparza/fxaudio/mediatype"
 )
 
 func TestEvent_AddEvent_ValidEvent_Successful(t *testing.T) {
@@ -15,7 +14,7 @@ func TestEvent_AddEvent_ValidEvent_Successful(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -24,7 +23,7 @@ func TestEvent_AddEvent_ValidEvent_Successful(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testEvent := data.Event{EventType: event.SystemStartup, MediaType: "Test", Details: "Unit test details"}
+	testEvent := data2.Event{EventType: event.SystemStartup, MediaType: "Test", Details: "Unit test details"}
 
 	//	Act
 	newEvent, err := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, "127.0.0.1", 2*time.Hour)
@@ -45,7 +44,7 @@ func TestEvent_GetEvent_ValidEvent_Successful(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -54,7 +53,7 @@ func TestEvent_GetEvent_ValidEvent_Successful(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testEvent := data.Event{EventType: event.SystemStartup, MediaType: mediatype.Unknown, Details: "Unit test details"}
+	testEvent := data2.Event{EventType: event.SystemStartup, MediaType: mediatype.Unknown, Details: "Unit test details"}
 
 	//	Act
 	newEvent, _ := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, "127.0.0.1", 2*time.Hour)
@@ -80,7 +79,7 @@ func TestEvent_GetEvent_ExpiredEvent_ReturnsError(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -89,7 +88,7 @@ func TestEvent_GetEvent_ExpiredEvent_ReturnsError(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testEvent := data.Event{EventType: event.SystemStartup, MediaType: "Test", Details: "Unit test details"}
+	testEvent := data2.Event{EventType: event.SystemStartup, MediaType: "Test", Details: "Unit test details"}
 
 	//	Act
 	newEvent, _ := db.AddEvent(testEvent.EventType, testEvent.MediaType, testEvent.Details, "127.0.0.1", 2*time.Second)
@@ -111,7 +110,7 @@ func TestEvent_GetAllEvents_ValidEvents_Successful(t *testing.T) {
 	//	Arrange
 	systemdb := getTestFiles()
 
-	db, err := data.NewManager(systemdb)
+	db, err := data2.NewManager(systemdb)
 	if err != nil {
 		t.Fatalf("NewManager failed: %s", err)
 	}
@@ -120,9 +119,9 @@ func TestEvent_GetAllEvents_ValidEvents_Successful(t *testing.T) {
 		os.RemoveAll(systemdb)
 	}()
 
-	testEvent1 := data.Event{EventType: event.SystemStartup, MediaType: mediatype.Audio, Details: "Unit test 1 details"}
-	testEvent2 := data.Event{EventType: event.SystemStartup, MediaType: mediatype.Audio, Details: "Unit test 2 details"}
-	testEvent3 := data.Event{EventType: event.SystemStartup, MediaType: mediatype.Audio, Details: "Unit test 3 details"}
+	testEvent1 := data2.Event{EventType: event.SystemStartup, MediaType: mediatype.Audio, Details: "Unit test 1 details"}
+	testEvent2 := data2.Event{EventType: event.SystemStartup, MediaType: mediatype.Audio, Details: "Unit test 2 details"}
+	testEvent3 := data2.Event{EventType: event.SystemStartup, MediaType: mediatype.Audio, Details: "Unit test 3 details"}
 
 	//	Act
 	db.AddEvent(testEvent1.EventType, testEvent1.MediaType, testEvent1.Details, "127.0.0.1", 2*time.Hour)

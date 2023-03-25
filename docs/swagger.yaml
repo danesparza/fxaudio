@@ -12,8 +12,7 @@ definitions:
     type: object
   api.SystemResponse:
     properties:
-      data:
-        type: object
+      data: {}
       message:
         type: string
     type: object
@@ -108,6 +107,45 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Deletes a file in the system
+      tags:
+      - audio
+  /audio/loop/{id}/{loopTimes}:
+    post:
+      consumes:
+      - application/json
+      description: Play an audio file over and over.  (-1 to loop until stopped)
+      parameters:
+      - description: The file id to play
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The number of times to play. The value -1 will cause it to loop
+          until stopped
+        in: path
+        name: loopTimes
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Loop an audio file n times
       tags:
       - audio
   /audio/play:

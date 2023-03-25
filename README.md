@@ -46,3 +46,27 @@ sudo dpkg -r fxaudio
 
 ## Example hardware setup
 ![fxAudio example hardware setup](fxAudio_hardware_annotated.png)
+
+## The first second of audio is cut off!
+This is most likely your HDMI audio system doing something it shouldn't.  You can work around this by enabling a service to play 'no audio' all the time in the background.  This will keep the device ready for when you want to play some actual audio through it.  
+
+Put the following in `/etc/systemd/system/aplay.service`
+
+```
+[Unit]
+Description=Invoke aplay from /dev/zero at system start.
+
+[Service]
+ExecStart=/usr/bin/aplay -D default -t raw -r 44100 -c 2 -f S16_LE /dev/zero
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then run the following commands to register the service, enable it, and start it:
+
+```
+sudo systemctl daemon-reload
+sudo systemctl enable aplay
+sudo systemctl start aplay
+```

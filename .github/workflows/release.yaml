@@ -1,0 +1,89 @@
+name: Build and release
+
+on: [push]
+
+env:
+  APP_NAME: fxaudio
+  DEBIAN_PACKAGE_NAME: fxaudio-1.1.${{github.run_number}}_armhf
+  APP_VERSION: 1.1.${{github.run_number}}
+  PACKAGE_PATH: github.com/danesparza/fxaudio
+
+jobs:
+  vulnerabilitycheck:
+    name: Vulnerabilities scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.19.1'
+          check-latest: true
+
+      - name: Get scanner tool
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Scan for vulnerabilities
+        run: govulncheck ./...
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    container: golang:latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.x'
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Test prep
+        run: mkdir -p ~/fxaudio/db
+
+      - name: Test
+        run: go test -v ./...
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.x'
+
+      - name: Get compiler tool
+        run: go install github.com/mitchellh/gox@latest
+
+      - name: Get utilities
+        run: go install github.com/danesparza/tokenreplace@latest
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Create binaries for all platforms
+        run: mkdir -p /tmp/binaries; gox -osarch="linux/arm windows/amd64" -ldflags "-X $PACKAGE_PATH/cmd.BuildVersion=1.0.${GITHUB_RUN_NUMBER} -X $PACKAGE_PATH/cmd.CommitID=${GITHUB_SHA}" -output "/tmp/binaries/${APP_NAME}_{{.OS}}_{{.Arch}}" $PACKAGE_PATH/...
+
+      - name: Setup the debian package
+        run: mkdir -p "/tmp/packagestage"; cp -r ./dist "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/postinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/prerm"; tokenreplace -file "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/control" -token="{build}" -replacement="${GITHUB_RUN_NUMBER}";
+
+      - name: Create the debian package
+        run: mkdir -p "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin"; cp "/tmp/binaries/fxaudio_linux_arm" "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin/fxaudio"; cd /tmp/packagestage; dpkg -b "${DEBIAN_PACKAGE_NAME}"; mv *.deb "/tmp/binaries";
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Release binaries
+          path: /tmp/binaries
+
+

@@ -5,6 +5,8 @@ go 1.16
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-chi/chi/v5 v5.0.8 // indirect
+	github.com/go-chi/cors v1.2.1 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/logutils v1.0.0
 	github.com/mailru/easyjson v0.7.7 // indirect

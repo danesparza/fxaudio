@@ -7,18 +7,18 @@ import (
 	"github.com/danesparza/fxaudio/internal/event"
 	"github.com/danesparza/fxaudio/internal/media"
 	"github.com/danesparza/fxaudio/internal/mediatype"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
 	"github.com/danesparza/fxaudio/api"
 	_ "github.com/danesparza/fxaudio/docs" // swagger docs location
-	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -94,55 +94,47 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	//	Create a router and setup our REST endpoints...
-	restRouter := mux.NewRouter()
+	r := chi.NewRouter()
 
-	//	UI ROUTES
-	if viper.GetString("server.ui-dir") == "" {
-		//	Use the static assets file generated with
-		//	https://github.com/elazarl/go-bindata-assetfs using the application-monitor-ui from
-		//	https://github.com/danesparza/application-monitor-ui.
-		//
-		//	To generate this file, run `yarn build` under the "navajo-plex-ui" project.
-		//	Then rename the 'build' directory to 'ui', place that
-		//	directory under the main navajo-plex directory and run the commands:
-		//	go-bindata-assetfs -pkg cmd -o .\cmd\bindata.go ./ui/...
-		//	go install ./...
+	//	Add middleware
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Compress(5))
 
-		//  UIRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(assetFS())))
-	} else {
-		//	Use the supplied directory:
-		log.Info().Str("ui-dir", viper.GetString("server.ui-dir")).Msg("Using UI directory")
-		restRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("server.ui-dir")))))
-	}
+	//	... including CORS middleware
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
-	//	AUDIO ROUTES
-	restRouter.HandleFunc("/v1/audio", apiService.UploadFile).Methods("PUT")         // Upload a file
-	restRouter.HandleFunc("/v1/audio", apiService.ListAllFiles).Methods("GET")       // List all files
-	restRouter.HandleFunc("/v1/audio/{id}", apiService.DeleteFile).Methods("DELETE") // Delete a file
+	r.Route("/v1", func(r chi.Router) {
+		//	Audio routes
+		r.Put("/audio", apiService.UploadFile)
+		r.Get("/audio", apiService.ListAllFiles)
+		r.Delete("/audio/{id}", apiService.DeleteFile)
 
-	restRouter.HandleFunc("/v1/audio/play", apiService.PlayRandomAudio).Methods("POST") // Play a random file
-	restRouter.HandleFunc("/v1/audio/play/{id}", apiService.PlayAudio).Methods("POST")  // Play a file
-	restRouter.HandleFunc("/v1/audio/stream", apiService.StreamAudio).Methods("POST")   // Stream the endpoint specified in JSON
-	restRouter.HandleFunc("/v1/audio/stop", apiService.StopAllAudio).Methods("POST")    // Stop playing all audio
-	restRouter.HandleFunc("/v1/audio/stop/{pid}", apiService.StopAudio).Methods("POST") // Stop playing a file
+		r.Post("/audio/play", apiService.PlayRandomAudio)
+		r.Post("/audio/play/{id}", apiService.PlayAudio)
+		r.Post("/audio/stream", apiService.StreamAudio)
+		r.Post("/audio/stop", apiService.StopAllAudio)
+		r.Post("/audio/stop/{id}", apiService.StopAudio)
 
-	//	EVENT ROUTES
-	restRouter.HandleFunc("/v1/events", apiService.GetAllEvents).Methods("GET") // List all events
-	restRouter.HandleFunc("/v1/event/{id}", apiService.GetEvent).Methods("GET") // Get a specific log event
+		//	Event routes
+		r.Get("/events", apiService.GetAllEvents)
+		r.Get("/event/{id}", apiService.GetEvent)
+	})
 
-	//	SWAGGER ROUTES
-	restRouter.PathPrefix("/v1/swagger").Handler(httpSwagger.WrapHandler)
+	//	SWAGGER
+	r.Mount("/swagger", httpSwagger.WrapHandler)
 
 	//	Start the media processor:
 	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia, apiService.StopAllMedia)
-
-	//	Setup the CORS options:
-	log.Info().Str("server.allowed-origins", viper.GetString("server.allowed-origins")).Msg("Allowed CORS origins")
-
-	uiCorsRouter := cors.New(cors.Options{
-		AllowedOrigins:   strings.Split(viper.GetString("server.allowed-origins"), ","),
-		AllowCredentials: true,
-	}).Handler(restRouter)
 
 	//	Format the bound interface:
 	formattedServerInterface := viper.GetString("server.bind")
@@ -152,10 +144,10 @@ func start(cmd *cobra.Command, args []string) {
 
 	//	Start the service and display how to access it
 	log.Info().
-		Str("documentation-url", fmt.Sprintf("http://%s:%s/v1/swagger/", formattedServerInterface, viper.GetString("server.port"))).
+		Str("documentation-url", fmt.Sprintf("http://%s:%s/swagger/", formattedServerInterface, viper.GetString("server.port"))).
 		Msg("REST service started")
 
-	err = http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter)
+	err = http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), r)
 	if err != nil {
 		log.Err(err).Msg("Problem with REST server")
 	}

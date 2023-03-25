@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/danesparza/fxaudio/internal/data"
 	"github.com/danesparza/fxaudio/internal/event"
 	"github.com/danesparza/fxaudio/internal/media"
 	"github.com/danesparza/fxaudio/internal/mediatype"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,6 +19,7 @@ import (
 	_ "github.com/danesparza/fxaudio/docs" // swagger docs location
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	httpSwagger "github.com/swaggo/http-swagger" // http-swagger middleware
@@ -36,9 +37,9 @@ func start(cmd *cobra.Command, args []string) {
 
 	//	If we have a config file, report it:
 	if viper.ConfigFileUsed() != "" {
-		log.Println("[DEBUG] Using config file:", viper.ConfigFileUsed())
+		log.Debug().Str("configFile", viper.ConfigFileUsed()).Msg("Using config file")
 	} else {
-		log.Println("[DEBUG] No config file found.")
+		log.Debug().Msg("No config file found")
 	}
 
 	retentiondays := viper.GetString("datastore.retentiondays")
@@ -47,23 +48,24 @@ func start(cmd *cobra.Command, args []string) {
 	uploadByteLimit := viper.GetString("upload.bytelimit")
 
 	//	Emit what we know:
-	log.Printf("[INFO] ************* CONFIG *************\n")
-	log.Printf("[INFO] System DB: %s\n", systemdb)
-	log.Printf("[INFO] History retention: %s days\n", retentiondays)
-	log.Printf("[INFO] Upload path: %s\n", uploadPath)
-	log.Printf("[INFO] Upload limit: %s bytes\n", uploadByteLimit)
-	log.Printf("[INFO] **************************\n")
+	log.Info().
+		Str("systemdb", systemdb).
+		Str("retentiondays", retentiondays).
+		Str("uploadPath", uploadPath).
+		Str("uploadByteLimit", uploadByteLimit).
+		Msg("Config")
 
-	//	Log the log retention (in days):
+	//	Parse the log retention (in days):
 	historyttl, err := strconv.Atoi(retentiondays)
 	if err != nil {
-		log.Fatalf("[ERROR] The datastore.retentiondays config is invalid: %s", err)
+		log.Err(err).Msg("The datastore.retentiondays config is invalid")
+		return
 	}
 
 	//	Create a DBManager object and associate with the api.Service
 	db, err := data.NewManager(systemdb)
 	if err != nil {
-		log.Printf("[ERROR] Error trying to open the system database: %s", err)
+		log.Err(err).Msg("Problem trying to open the system database")
 		return
 	}
 	defer db.Close()
@@ -87,7 +89,7 @@ func start(cmd *cobra.Command, args []string) {
 	//	Log that the system has started:
 	_, err = db.AddEvent(event.SystemStartup, mediatype.System, "System started", "", apiService.HistoryTTL)
 	if err != nil {
-		log.Fatalf("[ERROR] Error trying to log to the system datastore: %s", err)
+		log.Err(err).Msg("Problem trying to log to the system datastore")
 		return
 	}
 
@@ -109,7 +111,7 @@ func start(cmd *cobra.Command, args []string) {
 		//  UIRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(assetFS())))
 	} else {
 		//	Use the supplied directory:
-		log.Printf("[INFO] Using UI directory: %s\n", viper.GetString("server.ui-dir"))
+		log.Info().Str("ui-dir", viper.GetString("server.ui-dir")).Msg("Using UI directory")
 		restRouter.PathPrefix("/ui").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir(viper.GetString("server.ui-dir")))))
 	}
 
@@ -135,7 +137,7 @@ func start(cmd *cobra.Command, args []string) {
 	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia, apiService.StopAllMedia)
 
 	//	Setup the CORS options:
-	log.Printf("[INFO] Allowed CORS origins: %s\n", viper.GetString("server.allowed-origins"))
+	log.Info().Str("server.allowed-origins", viper.GetString("server.allowed-origins")).Msg("Allowed CORS origins")
 
 	uiCorsRouter := cors.New(cors.Options{
 		AllowedOrigins:   strings.Split(viper.GetString("server.allowed-origins"), ","),
@@ -149,8 +151,14 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	//	Start the service and display how to access it
-	log.Printf("[INFO] REST service documentation: http://%s:%s/v1/swagger/\n", formattedServerInterface, viper.GetString("server.port"))
-	log.Printf("[ERROR] %v\n", http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter))
+	log.Info().
+		Str("documentation-url", fmt.Sprintf("http://%s:%s/v1/swagger/", formattedServerInterface, viper.GetString("server.port"))).
+		Msg("REST service started")
+
+	err = http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), uiCorsRouter)
+	if err != nil {
+		log.Err(err).Msg("Problem with REST server")
+	}
 }
 
 func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc, db *data.Manager, historyttl time.Duration) {
@@ -159,9 +167,9 @@ func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.Ca
 	case sig := <-sigs:
 		switch sig {
 		case os.Interrupt:
-			log.Println("[INFO] SIGINT")
+			log.Info().Msg("SIGINT")
 		case syscall.SIGTERM:
-			log.Println("[INFO] SIGTERM")
+			log.Info().Msg("SIGTERM")
 		}
 
 		//	Log that the system has started:
@@ -170,7 +178,7 @@ func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.Ca
 			log.Printf("[ERROR] Error trying to log to the system datastore: %s", err)
 		}
 
-		log.Println("[INFO] Shutting down ...")
+		log.Info().Msg("Shutting down ...")
 		cancel()
 		os.Exit(0)
 	}

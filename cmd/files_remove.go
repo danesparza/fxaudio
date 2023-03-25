@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/danesparza/fxaudio/internal/data"
-	"log"
+	"github.com/rs/zerolog/log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -26,25 +26,27 @@ fxaudio files remove c1ucgu16v83ji73f1m60`,
 		//	Create a DBManager object
 		db, err := data.NewManager(viper.GetString("datastore.system"))
 		if err != nil {
-			log.Fatalf("[ERROR] Error trying to open the system database: %s", err)
+			log.Err(err).Msg("Problem trying to open the system database")
+			return
 		}
 		defer db.Close()
 
 		//	Find the file information:
 		gotFile, err := db.GetFile(removeId)
 		if err != nil {
-			log.Fatalf("[ERROR] Error trying to find fileid %s: %s", removeId, err)
+			log.Err(err).Str("fileid", removeId).Msg("Problem trying to find fileid")
+			return
 		}
 
 		//	Remove the file from the system
 		if err = db.DeleteFile(removeId); err != nil {
-			log.Fatalf("[ERROR] Error removing file from system %s: %s", gotFile.FilePath, err)
+			log.Err(err).Str("file", gotFile.FilePath).Msg("Problem removing file from system")
 			return
 		}
 
 		//	Delete the file on disk
 		if err = os.Remove(gotFile.FilePath); err != nil {
-			log.Fatalf("[ERROR] Error removing file from disk %s: %s", gotFile.FilePath, err)
+			log.Err(err).Str("file", gotFile.FilePath).Msg("Problem removing file from disk")
 			return
 		}
 

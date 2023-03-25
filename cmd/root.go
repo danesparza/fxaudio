@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/hashicorp/logutils"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -79,14 +78,6 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		problemWithConfigFile = true
 	}
-
-	//	Set the log level from config (if we have it)
-	filter := &logutils.LevelFilter{
-		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
-		MinLevel: logutils.LogLevel(viper.GetString("loglevel")),
-		Writer:   os.Stderr,
-	}
-	log.SetOutput(filter)
 }
 
 // GetOutboundIP gets the preferred outbound ip of this machine

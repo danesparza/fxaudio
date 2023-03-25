@@ -13,7 +13,8 @@ require (
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/pterm/pterm v0.12.13
 	github.com/rs/cors v1.8.3
-	github.com/rs/xid v1.3.0
+	github.com/rs/xid v1.4.0
+	github.com/rs/zerolog v1.29.0
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.6.1

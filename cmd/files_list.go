@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/danesparza/fxaudio/internal/data"
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -22,7 +22,7 @@ func listFiles(cmd *cobra.Command, args []string) {
 	//	Create a DBManager object
 	db, err := data.NewManager(viper.GetString("datastore.system"))
 	if err != nil {
-		log.Printf("[ERROR] Error trying to open the system database: %s", err)
+		log.Err(err).Msg("Problem trying to open the system database")
 		return
 	}
 	defer db.Close()
@@ -30,7 +30,7 @@ func listFiles(cmd *cobra.Command, args []string) {
 	//	Get a list of all files:
 	gotFiles, err := db.GetAllFiles()
 	if err != nil {
-		log.Fatalf("[ERROR] Error trying to get all files: %s", err)
+		log.Err(err).Msg("Problem trying to get all files")
 	}
 
 	//	Gather our formatted output

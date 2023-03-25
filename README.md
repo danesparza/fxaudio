@@ -1,4 +1,4 @@
-# fxaudio [![CircleCI](https://circleci.com/gh/danesparza/fxaudio.svg?style=shield)](https://circleci.com/gh/danesparza/fxaudio)
+# fxaudio [![Build and release](https://github.com/danesparza/fxaudio/actions/workflows/release.yaml/badge.svg)](https://github.com/danesparza/fxaudio/actions/workflows/release.yaml) 
 REST service for multichannel audio on demand from Raspberry Pi.  Made with ❤️ for makers, DIY craftsmen, and professional soundstage designers everywhere
 
 ## Prerequisites

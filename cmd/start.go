@@ -114,14 +114,18 @@ func start(cmd *cobra.Command, args []string) {
 	}))
 
 	r.Route("/v1", func(r chi.Router) {
-		//	Audio routes
+		//	File management
 		r.Put("/audio", apiService.UploadFile)
 		r.Get("/audio", apiService.ListAllFiles)
 		r.Delete("/audio/{id}", apiService.DeleteFile)
 
+		//	Play audio
 		r.Post("/audio/play", apiService.PlayRandomAudio)
 		r.Post("/audio/play/{id}", apiService.PlayAudio)
 		r.Post("/audio/stream", apiService.StreamAudio)
+		r.Post("/audio/loop/{id}/{loopTimes}", apiService.LoopAudio)
+
+		//	Stop audio
 		r.Post("/audio/stop", apiService.StopAllAudio)
 		r.Post("/audio/stop/{id}", apiService.StopAudio)
 

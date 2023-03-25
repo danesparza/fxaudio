@@ -5,8 +5,6 @@ go 1.16
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/go-openapi/spec v0.20.3 // indirect
-	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/logutils v1.0.0
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -21,8 +19,8 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.7.0
-	github.com/swaggo/http-swagger v1.0.0
-	github.com/swaggo/swag v1.7.0
+	github.com/swaggo/http-swagger v1.2.6
+	github.com/swaggo/swag v1.7.9
 	github.com/tidwall/buntdb v1.2.3
 	github.com/tidwall/gjson v1.12.1 // indirect
 	golang.org/x/net v0.7.0 // indirect

@@ -6,6 +6,7 @@ env:
   APP_NAME: fxaudio
   DEBIAN_PACKAGE_NAME: fxaudio-1.1.${{github.run_number}}_armhf
   APP_VERSION: 1.1.${{github.run_number}}
+  RELEASE_VERSION: v1.1.${{github.run_number}}
   PACKAGE_PATH: github.com/danesparza/fxaudio
   GITHUB_TOKEN: ${{secrets.GHR_TOKEN}}
 
@@ -91,7 +92,7 @@ jobs:
           path: /tmp/binaries
 
       - name: Create Github release
-        run: ghr -r ${PACKAGE_PATH} v${APP_VERSION} /tmp/binaries/
+        run: ghr -r $PACKAGE_PATH $RELEASE_VERSION /tmp/binaries/
 
 
 

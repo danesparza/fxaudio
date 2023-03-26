@@ -91,7 +91,6 @@ jobs:
           path: /tmp/binaries
 
       - name: Create Github release
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: ghr -r ${PACKAGE_PATH} v${APP_VERSION} /tmp/binaries/
 
 

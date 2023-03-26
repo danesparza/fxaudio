@@ -7,6 +7,7 @@ env:
   DEBIAN_PACKAGE_NAME: fxaudio-1.1.${{github.run_number}}_armhf
   APP_VERSION: 1.1.${{github.run_number}}
   PACKAGE_PATH: github.com/danesparza/fxaudio
+  GITHUB_TOKEN: ${{secrets.GHR_TOKEN}}
 
 jobs:
   vulnerabilitycheck:
@@ -68,6 +69,9 @@ jobs:
       - name: Get utilities
         run: go install github.com/danesparza/tokenreplace@latest
 
+      - name: Get release tool
+        run: go install github.com/tcnksm/ghr@latest
+
       - name: Get dependencies
         run: go mod download
 
@@ -85,5 +89,10 @@ jobs:
         with:
           name: Release binaries
           path: /tmp/binaries
+
+      - name: Create Github release
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: ghr -r ${PACKAGE_PATH} v${APP_VERSION} /tmp/binaries/
+
 
 

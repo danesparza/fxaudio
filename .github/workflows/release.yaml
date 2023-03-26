@@ -92,7 +92,7 @@ jobs:
           path: /tmp/binaries
 
       - name: Create Github release
-        run: ghr -r $PACKAGE_PATH $RELEASE_VERSION /tmp/binaries/
+        run: ghr $RELEASE_VERSION /tmp/binaries/
 
 
 

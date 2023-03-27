@@ -20,7 +20,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.7.0
 	github.com/swaggo/http-swagger v1.3.4
-	github.com/swaggo/swag v1.8.1
+	github.com/swaggo/swag v1.8.11
 	github.com/tidwall/buntdb v1.2.3
 	github.com/tidwall/gjson v1.12.1 // indirect
 	gopkg.in/ini.v1 v1.57.0 // indirect

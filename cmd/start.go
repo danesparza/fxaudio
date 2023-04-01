@@ -4,16 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/danesparza/fxaudio/internal/data"
-	"github.com/danesparza/fxaudio/internal/event"
 	"github.com/danesparza/fxaudio/internal/media"
-	"github.com/danesparza/fxaudio/internal/mediatype"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -42,7 +39,6 @@ func start(cmd *cobra.Command, args []string) {
 		log.Debug().Msg("No config file found")
 	}
 
-	retentiondays := viper.GetString("datastore.retentiondays")
 	systemdb := viper.GetString("datastore.system")
 	uploadPath := viper.GetString("upload.path")
 	uploadByteLimit := viper.GetString("upload.bytelimit")
@@ -50,50 +46,37 @@ func start(cmd *cobra.Command, args []string) {
 	//	Emit what we know:
 	log.Info().
 		Str("systemdb", systemdb).
-		Str("retentiondays", retentiondays).
 		Str("uploadPath", uploadPath).
 		Str("uploadByteLimit", uploadByteLimit).
 		Msg("Config")
 
-	//	Parse the log retention (in days):
-	historyttl, err := strconv.Atoi(retentiondays)
-	if err != nil {
-		log.Err(err).Msg("The datastore.retentiondays config is invalid")
-		return
-	}
-
-	//	Create a DBManager object and associate with the api.Service
-	db, err := data.NewManager(systemdb)
+	//	Init SQLite
+	db, err := data.InitSqlite(systemdb)
 	if err != nil {
 		log.Err(err).Msg("Problem trying to open the system database")
 		return
 	}
 	defer db.Close()
 
+	//	Init the AppDataService
+	appdata := data.NewAppDataService(db)
+
 	//	Create an api service object
 	apiService := api.Service{
 		PlayMedia:    make(chan media.PlayAudioRequest),
 		StopMedia:    make(chan string),
 		StopAllMedia: make(chan bool),
-		DB:           db,
+		DB:           appdata,
 		StartTime:    time.Now(),
-		HistoryTTL:   time.Duration(int(historyttl)*24) * time.Hour,
 	}
 
 	//	Trap program exit appropriately
 	ctx, cancel := context.WithCancel(context.Background())
 	sigs := make(chan os.Signal, 2)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
-	go handleSignals(ctx, sigs, cancel, db, apiService.HistoryTTL)
+	go handleSignals(ctx, sigs, cancel)
 
-	//	Log that the system has started:
-	_, err = db.AddEvent(event.SystemStartup, mediatype.System, "System started", "", apiService.HistoryTTL)
-	if err != nil {
-		log.Err(err).Msg("Problem trying to log to the system datastore")
-		return
-	}
-
-	//	Create a router and setup our REST endpoints...
+	//	Create a router and set up our REST endpoints...
 	r := chi.NewRouter()
 
 	//	Add middleware
@@ -130,9 +113,6 @@ func start(cmd *cobra.Command, args []string) {
 		r.Post("/audio/stop", apiService.StopAllAudio)
 		r.Post("/audio/stop/{id}", apiService.StopAudio)
 
-		//	Event routes
-		r.Get("/events", apiService.GetAllEvents)
-		r.Get("/event/{id}", apiService.GetEvent)
 	})
 
 	//	SWAGGER
@@ -158,7 +138,7 @@ func start(cmd *cobra.Command, args []string) {
 	}
 }
 
-func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc, db *data.Manager, historyttl time.Duration) {
+func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc) {
 	select {
 	case <-ctx.Done():
 	case sig := <-sigs:
@@ -167,12 +147,6 @@ func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.Ca
 			log.Info().Msg("SIGINT")
 		case syscall.SIGTERM:
 			log.Info().Msg("SIGTERM")
-		}
-
-		//	Log that the system has started:
-		_, err := db.AddEvent(event.SystemShutdown, mediatype.System, "System stopping", "", historyttl)
-		if err != nil {
-			log.Printf("[ERROR] Error trying to log to the system datastore: %s", err)
 		}
 
 		log.Info().Msg("Shutting down ...")

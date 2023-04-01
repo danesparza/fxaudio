@@ -1,90 +1,84 @@
 package data
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"time"
-
 	"github.com/rs/xid"
-	"github.com/tidwall/buntdb"
+	"github.com/rs/zerolog/log"
+	"time"
 )
 
 // File represents an uploaded file.
 type File struct {
-	ID          string    `json:"id"`       // Unique File ID
-	Created     time.Time `json:"created"`  // File create time
-	FilePath    string    `json:"filepath"` // Full filepath to the file
-	Description string    `json:"details"`  // Additional information (like the files involved)
+	ID          string   `json:"id"`       // Unique File ID
+	Created     int64    `json:"created"`  // File create time
+	FilePath    string   `json:"filepath"` // Full filepath to the file
+	Description string   `json:"details"`  // Additional information (like the files involved)
+	Tags        []string `json:"tags"`     // Tag list to associate with this file
 }
 
-// AddEvent adds an event to the system
-func (store Manager) AddFile(filepath, description string) (File, error) {
+func (a appDataService) AddFile(ctx context.Context, filepath, description string) (File, error) {
 	//	Our return item
-	retval := File{}
-
-	newFile := File{
+	retval := File{
 		ID:          xid.New().String(), // Generate a new id
-		Created:     time.Now(),
+		Created:     time.Now().Unix(),
 		FilePath:    filepath,
 		Description: description,
 	}
 
-	//	Serialize to JSON format
-	encoded, err := json.Marshal(newFile)
+	query := `insert into media(id, filepath, description, created) 
+				values($1, $2, $3, $4);`
+
+	stmt, err := a.DB.PrepareContext(ctx, query)
 	if err != nil {
-		return retval, fmt.Errorf("problem serializing the data: %s", err)
+		return retval, err
 	}
 
-	//	Save it to the database:
-	err = store.systemdb.Update(func(tx *buntdb.Tx) error {
-		_, _, err := tx.Set(GetKey("File", newFile.ID), string(encoded), &buntdb.SetOptions{})
-		return err
-	})
-
-	//	If there was an error saving the data, report it:
+	_, err = stmt.ExecContext(ctx, retval.ID, retval.FilePath, retval.Description, retval.Created)
 	if err != nil {
-		return retval, fmt.Errorf("problem saving the file: %s", err)
+		return retval, fmt.Errorf("problem executing query: %v", err)
 	}
 
-	//	Set our retval:
-	retval = newFile
-
-	//	Return our data:
 	return retval, nil
 }
 
 // GetFile gets information about a single file in the system based on its id
-func (store Manager) GetFile(id string) (File, error) {
+func (a appDataService) GetFile(ctx context.Context, id string) (File, error) {
 	//	Our return item
 	retval := File{}
 
-	//	Find the item:
-	err := store.systemdb.View(func(tx *buntdb.Tx) error {
+	query := `select id, filepath, description, created 
+				from media 
+				where id = $1;`
 
-		val, err := tx.Get(GetKey("File", id))
-		if err != nil {
-			return err
-		}
-
-		if len(val) > 0 {
-			//	Unmarshal data into our item
-			if err := json.Unmarshal([]byte(val), &retval); err != nil {
-				return err
-			}
-		}
-
-		//	If we get to this point and there is no error...
-		return nil
-	})
-
-	//	If there was an error, report it:
+	stmt, err := a.DB.PreparexContext(ctx, query)
 	if err != nil {
-		return retval, fmt.Errorf("problem getting the files: %s", err)
+		return retval, err
+	}
+
+	rows, err := stmt.QueryxContext(ctx, id)
+	if err != nil {
+		return retval, err
+	}
+
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			log.Err(closeErr).Msg("unable to close rows")
+		}
+	}()
+
+	for rows.Next() {
+		err = rows.StructScan(&retval)
+		if err != nil {
+			return retval, fmt.Errorf("problem reading into struct: %v", err)
+		}
 	}
 
 	//	Return our data:
 	return retval, nil
 }
+
+/*
 
 // GetAllFiles gets all files in the system
 func (store Manager) GetAllFiles() ([]File, error) {
@@ -143,3 +137,4 @@ func (store Manager) DeleteFile(id string) error {
 	//	Return our data:
 	return nil
 }
+*/

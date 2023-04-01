@@ -1,57 +1,72 @@
 package data
 
 import (
-	"fmt"
+	"context"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/tidwall/buntdb"
+	"path"
 )
 
-// Manager is the data manager
-type Manager struct {
-	systemdb *buntdb.DB
+type AppDataService interface {
+	AddFile(ctx context.Context, filepath, description string) (File, error)
+	GetFile(ctx context.Context, id string) (File, error)
 }
 
-// NewManager creates a new instance of a Manager and returns it
-func NewManager(systemdbpath string) (*Manager, error) {
-	retval := new(Manager)
+type appDataService struct {
+	*sqlx.DB
+}
 
-	//	Make sure the path already exists:
-	if err := os.MkdirAll(filepath.Dir(systemdbpath), os.FileMode(0664)); err != nil {
-		return nil, err
-	}
+func NewAppDataService(db *sqlx.DB) AppDataService {
+	return &appDataService{db}
+}
 
-	sysdb, err := buntdb.Open(systemdbpath)
+// InitSqlite initializes SQLite and returns a pointer to the db
+// object, or an error
+func InitSqlite(datasource string) (*sqlx.DB, error) {
+	log.Info().Msg("InitSqlite")
+
+	//	Make sure the path is created:
+	err := os.MkdirAll(datasource, 0777)
 	if err != nil {
-		return retval, fmt.Errorf("problem opening the systemDB: %s", err)
-	}
-	retval.systemdb = sysdb
-
-	//	Create our indexes
-	sysdb.CreateIndex("Event", "Event:*", buntdb.IndexString)
-	sysdb.CreateIndex("File", "File:*", buntdb.IndexString)
-
-	//	Return our Manager reference
-	return retval, nil
-}
-
-// Close closes the data Manager
-func (store Manager) Close() error {
-	syserr := store.systemdb.Close()
-
-	if syserr != nil {
-		return fmt.Errorf("an error occurred closing the manager.  Syserr: %s ", syserr)
+		log.Fatal().Err(err).Str("datasource", datasource).Msg("Problem creating datasource directory")
 	}
 
-	return nil
-}
+	//	Connect to the datasource
+	dbname := path.Join(datasource, "fxaudio.db")
+	db, err := sqlx.Open("sqlite3", dbname)
+	if err != nil {
+		log.Fatal().Err(err).Str("dbname", dbname).Msg("Problem connecting to SQLite database")
+	}
 
-// GetKey returns a key to be used in the storage system
-func GetKey(entityType string, keyPart ...string) string {
-	allparts := []string{}
-	allparts = append(allparts, entityType)
-	allparts = append(allparts, keyPart...)
-	return strings.Join(allparts, ":")
+	//	Run migrations
+	driver, err := sqlite3.WithInstance(db.DB, &sqlite3.Config{})
+	if err != nil {
+		log.Fatal().Err(err).Msg("problem setting up driver for migrations")
+	}
+
+	migrator, err := migrate.NewWithDatabaseInstance(
+		viper.GetString("datastore.migrationsource"),
+		dbname, driver)
+	if err != nil {
+		log.Fatal().Err(err).Msg("problem creating migrator config")
+	}
+
+	err = migrator.Up()
+	switch err {
+	case migrate.ErrNoChange:
+		log.Info().Msg("sqlite schema is up-to-date")
+	case nil:
+		log.Info().Msg("sqlite schema was updated successfully")
+	default:
+		log.Err(err).Msg("problem running migrations")
+		return db, err
+	}
+
+	return db, nil
 }

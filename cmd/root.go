@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -39,10 +39,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/fxaudio.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&loglevel, "loglevel", "l", "INFO", "Log level: DEBUG/INFO/WARN/ERROR")
-
-	//	Bind config flags for optional config file override:
-	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -66,9 +62,8 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	//	Set our defaults
-	viper.SetDefault("loglevel", "INFO")
-	viper.SetDefault("datastore.system", path.Join(home, "fxaudio", "db", "system.db"))
-	viper.SetDefault("datastore.retentiondays", 30)
+	viper.SetDefault("datastore.system", path.Join(home, "fxaudio", "db"))
+	viper.SetDefault("datastore.migrationsource", "file://./scripts/sqlite/migrations")
 	viper.SetDefault("upload.path", path.Join(home, "fxaudio", "uploads"))
 	viper.SetDefault("upload.bytelimit", 15*1024*1024) // 15MB
 	viper.SetDefault("server.port", 3000)

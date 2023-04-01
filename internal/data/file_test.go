@@ -1,11 +1,15 @@
 package data_test
 
 import (
-	data2 "github.com/danesparza/fxaudio/internal/data"
-	"os"
+	"context"
+	"github.com/danesparza/fxaudio/internal/data"
+	"github.com/sanity-io/litter"
+	"github.com/spf13/viper"
+	"reflect"
 	"testing"
 )
 
+/*
 func TestFile_AddFile_ValidFile_Successful(t *testing.T) {
 
 	//	Arrange
@@ -152,4 +156,99 @@ func TestFile_DeleteFile_ValidFiles_Successful(t *testing.T) {
 		t.Errorf("DeleteFile failed: Should get an item with different details than the removed item but got: %+v", gotFiles[1])
 	}
 
+}
+*/
+
+func Test_appDataService_AddFile(t *testing.T) {
+	type args struct {
+		ctx         context.Context
+		filepath    string
+		description string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Valid arguments - saves to database",
+			args: args{
+				ctx:         context.TODO(),
+				filepath:    "testfile1.mp3",
+				description: "This is a test file",
+			},
+			wantErr: false,
+		},
+	}
+
+	//	Initialize sqlite
+	db, err := data.InitSqlite(viper.GetString("datastore.system"))
+	if err != nil {
+		t.Errorf("Problem initializing database: %v", err)
+	}
+
+	a := data.NewAppDataService(db)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			got, err := a.AddFile(tt.args.ctx, tt.args.filepath, tt.args.description)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("AddFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			litter.Dump(got)
+		})
+	}
+}
+
+func Test_appDataService_GetFile(t *testing.T) {
+	type args struct {
+		ctx context.Context
+		id  string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    data.File
+		wantErr bool
+	}{
+		{
+			name: "Valid arguments - select from db",
+			args: args{
+				ctx: context.TODO(),
+				id:  "cgk8ckj511ion26hceh0",
+			},
+			want: data.File{
+				ID:          "cgk8ckj511ion26hceh0",
+				Created:     1680377426,
+				FilePath:    "testfile1.mp3",
+				Description: "This is a test file",
+				Tags:        nil,
+			},
+			wantErr: false,
+		},
+	}
+
+	//	Initialize sqlite
+	db, err := data.InitSqlite(viper.GetString("datastore.system"))
+	if err != nil {
+		t.Errorf("Problem initializing database: %v", err)
+	}
+
+	a := data.NewAppDataService(db)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := a.GetFile(tt.args.ctx, tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetFile() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

@@ -12,9 +12,8 @@ import (
 
 // Service encapsulates API service operations
 type Service struct {
-	DB         *data.Manager
-	StartTime  time.Time
-	HistoryTTL time.Duration
+	DB        data.AppDataService
+	StartTime time.Time
 
 	// PlayMedia signals a file should be played
 	PlayMedia chan media.PlayAudioRequest

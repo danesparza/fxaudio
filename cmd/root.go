@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"net"
 	"os"
 	"path"
 
@@ -73,17 +71,4 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		problemWithConfigFile = true
 	}
-}
-
-// GetOutboundIP gets the preferred outbound ip of this machine
-func GetOutboundIP() net.IP {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
-	if err != nil {
-		log.Fatal().Err(err).Msg("Problem getting outbound IP")
-	}
-	defer conn.Close()
-
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-
-	return localAddr.IP
 }

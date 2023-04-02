@@ -122,20 +122,11 @@ func start(cmd *cobra.Command, args []string) {
 	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia, apiService.StopAllMedia)
 
 	//	Format the bound interface:
-	formattedServerInterface := viper.GetString("server.bind")
-	if formattedServerInterface == "" {
-		formattedServerInterface = GetOutboundIP().String()
-	}
+	formattedServerPort := fmt.Sprintf(":%v", viper.GetString("server.port"))
 
 	//	Start the service and display how to access it
-	log.Info().
-		Str("documentation-url", fmt.Sprintf("http://%s:%s/swagger/", formattedServerInterface, viper.GetString("server.port"))).
-		Msg("REST service started")
-
-	err = http.ListenAndServe(viper.GetString("server.bind")+":"+viper.GetString("server.port"), r)
-	if err != nil {
-		log.Err(err).Msg("Problem with REST server")
-	}
+	log.Info().Str("server", formattedServerPort).Msg("Started REST service")
+	log.Err(http.ListenAndServe(formattedServerPort, r)).Msg("HTTP API service error")
 }
 
 func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc) {

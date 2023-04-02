@@ -16,6 +16,8 @@ import (
 type AppDataService interface {
 	AddFile(ctx context.Context, filepath, description string) (File, error)
 	GetFile(ctx context.Context, id string) (File, error)
+	GetAllFiles(ctx context.Context) ([]File, error)
+	DeleteFile(ctx context.Context, id string) error
 }
 
 type appDataService struct {

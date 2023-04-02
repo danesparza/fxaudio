@@ -34,6 +34,43 @@ func (_m *MockAppDataService) AddFile(ctx context.Context, filepath string, desc
 	return r0, r1
 }
 
+// DeleteFile provides a mock function with given fields: ctx, id
+func (_m *MockAppDataService) DeleteFile(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetAllFiles provides a mock function with given fields: ctx
+func (_m *MockAppDataService) GetAllFiles(ctx context.Context) ([]File, error) {
+	ret := _m.Called(ctx)
+
+	var r0 []File
+	if rf, ok := ret.Get(0).(func(context.Context) []File); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]File)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFile provides a mock function with given fields: ctx, id
 func (_m *MockAppDataService) GetFile(ctx context.Context, id string) (File, error) {
 	ret := _m.Called(ctx, id)

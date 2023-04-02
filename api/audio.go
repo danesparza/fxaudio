@@ -107,23 +107,23 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 // @Router /audio [get]
 func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 
-	////	Get a list of files
-	//retval, err := service.DB.GetAllFiles()
-	//if err != nil {
-	//	err = fmt.Errorf("error getting a list of files: %v", err)
-	//	sendErrorResponse(rw, err, http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	////	Construct our response
-	//response := SystemResponse{
-	//	Message: fmt.Sprintf("%v file(s)", len(retval)),
-	//	Data:    retval,
-	//}
-	//
-	////	Serialize to JSON & return the response:
-	//rw.Header().Set("Content-Type", "application/json; charset=utf-8")
-	//json.NewEncoder(rw).Encode(response)
+	//	Get a list of files
+	retval, err := service.DB.GetAllFiles(req.Context())
+	if err != nil {
+		err = fmt.Errorf("error getting a list of files: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Construct our response
+	response := SystemResponse{
+		Message: fmt.Sprintf("%v file(s)", len(retval)),
+		Data:    retval,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
 
 }
 
@@ -141,32 +141,32 @@ func (service Service) ListAllFiles(rw http.ResponseWriter, req *http.Request) {
 // @Router /audio/{id} [delete]
 func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 
-	////	Get the id from the url (if it's blank, return an error)
-	//audioId := chi.URLParam(req, "id")
-	//
-	//if audioId == "" {
-	//	err := fmt.Errorf("requires an id of a file to delete")
-	//	sendErrorResponse(rw, err, http.StatusBadRequest)
-	//	return
-	//}
-	//
-	////	Delete the file
-	//err := service.DB.DeleteFile(audioId)
-	//if err != nil {
-	//	err = fmt.Errorf("error deleting file: %v", err)
-	//	sendErrorResponse(rw, err, http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	////	Construct our response
-	//response := SystemResponse{
-	//	Message: "File deleted",
-	//	Data:    audioId,
-	//}
-	//
-	////	Serialize to JSON & return the response:
-	//rw.Header().Set("Content-Type", "application/json; charset=utf-8")
-	//json.NewEncoder(rw).Encode(response)
+	//	Get the id from the url (if it's blank, return an error)
+	audioId := chi.URLParam(req, "id")
+
+	if audioId == "" {
+		err := fmt.Errorf("requires an id of a file to delete")
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Delete the file
+	err := service.DB.DeleteFile(req.Context(), audioId)
+	if err != nil {
+		err = fmt.Errorf("error deleting file: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Construct our response
+	response := SystemResponse{
+		Message: "File deleted",
+		Data:    audioId,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
 
 }
 
@@ -376,60 +376,60 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 // @Router /audio/play [post]
 func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request) {
 
-	////	req.Body is a ReadCloser -- we need to remember to close it:
-	//defer req.Body.Close()
-	//
-	////	Get just the file endpoint:
-	//fileendpoint := ""
-	//
-	////	If we don't have an endpoint specified, get a random file that we manage
-	//if fileendpoint == "" {
-	//	retval, err := service.DB.GetAllFiles()
-	//	if err != nil {
-	//		err = fmt.Errorf("error getting a list of files: %v", err)
-	//		sendErrorResponse(rw, err, http.StatusInternalServerError)
-	//		return
-	//	}
-	//
-	//	//	If we don't have anything to pick from, bomb out
-	//	if len(retval) < 1 {
-	//		err = fmt.Errorf("can't play anything -- no endpoint specified, and no files to randomly pick from: %v", err)
-	//		sendErrorResponse(rw, err, http.StatusBadRequest)
-	//		return
-	//	}
-	//
-	//	//	Pick a random file:
-	//	randomIndex := math_rand.Intn(len(retval))
-	//
-	//	//	Set fileendpoint to the random file's path:
-	//	fileendpoint = retval[randomIndex].FilePath
-	//}
-	//
-	////	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
-	//_, err := exec.LookPath("mpg123")
-	//if err != nil {
-	//	err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
-	//	sendErrorResponse(rw, err, http.StatusServiceUnavailable)
-	//	return
-	//}
-	//
-	////	Send to the channel:
-	//playRequest := media.PlayAudioRequest{
-	//	ProcessID: xid.New().String(), // Generate a new id
-	//	FilePath:  fileendpoint,
-	//	LoopTimes: "1",
-	//}
-	//service.PlayMedia <- playRequest
-	//
-	////	Create our response and send information back:
-	//response := SystemResponse{
-	//	Message: "Audio playing",
-	//	Data:    playRequest,
-	//}
-	//
-	////	Serialize to JSON & return the response:
-	//rw.Header().Set("Content-Type", "application/json; charset=utf-8")
-	//json.NewEncoder(rw).Encode(response)
+	//	req.Body is a ReadCloser -- we need to remember to close it:
+	defer req.Body.Close()
+
+	//	Get just the file endpoint:
+	fileendpoint := ""
+
+	//	If we don't have an endpoint specified, get a random file that we manage
+	if fileendpoint == "" {
+		retval, err := service.DB.GetAllFiles(req.Context())
+		if err != nil {
+			err = fmt.Errorf("error getting a list of files: %v", err)
+			sendErrorResponse(rw, err, http.StatusInternalServerError)
+			return
+		}
+
+		//	If we don't have anything to pick from, bomb out
+		if len(retval) < 1 {
+			err = fmt.Errorf("can't play anything -- no endpoint specified, and no files to randomly pick from: %v", err)
+			sendErrorResponse(rw, err, http.StatusBadRequest)
+			return
+		}
+
+		//	Pick a random file:
+		randomIndex := math_rand.Intn(len(retval))
+
+		//	Set fileendpoint to the random file's path:
+		fileendpoint = retval[randomIndex].FilePath
+	}
+
+	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
+	_, err := exec.LookPath("mpg123")
+	if err != nil {
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+		return
+	}
+
+	//	Send to the channel:
+	playRequest := media.PlayAudioRequest{
+		ProcessID: xid.New().String(), // Generate a new id
+		FilePath:  fileendpoint,
+		LoopTimes: "1",
+	}
+	service.PlayMedia <- playRequest
+
+	//	Create our response and send information back:
+	response := SystemResponse{
+		Message: "Audio playing",
+		Data:    playRequest,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
 }
 
 // StopAudio godoc

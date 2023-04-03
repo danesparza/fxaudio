@@ -56,7 +56,10 @@ func InitSqlite(datasource string) (*sqlx.DB, error) {
 		viper.GetString("datastore.migrationsource"),
 		dbname, driver)
 	if err != nil {
-		log.Fatal().Err(err).Msg("problem creating migrator config")
+		log.Fatal().
+			Str("dbname", dbname).
+			Str("datastore.migrationsource", viper.GetString("datastore.migrationsource")).
+			Err(err).Msg("problem creating migrator config")
 	}
 
 	err = migrator.Up()

@@ -21,4 +21,5 @@ require (
 	github.com/swaggo/swag v1.8.11
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
+	modernc.org/sqlite v1.21.1 // indirect
 )

@@ -2,13 +2,13 @@ package data
 
 import (
 	"context"
-	_ "github.com/glebarez/go-sqlite"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	_ "modernc.org/sqlite"
 	"os"
 	"path"
 )
@@ -41,13 +41,13 @@ func InitSqlite(datasource string) (*sqlx.DB, error) {
 
 	//	Connect to the datasource
 	dbname := path.Join(datasource, "fxaudio.db")
-	db, err := sqlx.Open("sqlite3", dbname)
+	db, err := sqlx.Open("sqlite", dbname)
 	if err != nil {
 		log.Fatal().Err(err).Str("dbname", dbname).Msg("Problem connecting to SQLite database")
 	}
 
 	//	Run migrations
-	driver, err := sqlite3.WithInstance(db.DB, &sqlite3.Config{})
+	driver, err := sqlite.WithInstance(db.DB, &sqlite.Config{})
 	if err != nil {
 		log.Fatal().Err(err).Msg("problem setting up driver for migrations")
 	}

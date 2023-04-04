@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/golang-migrate/migrate/v4/source/file" // Add the file migrations source to golang-migrate
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	_ "modernc.org/sqlite"
+	_ "modernc.org/sqlite" // Register relevant drivers.
 	"os"
 	"path/filepath"
 )
@@ -49,7 +49,7 @@ func InitSqlite(datasource string) (*sqlx.DB, error) {
 	//	Run migrations
 	driver, err := sqlite.WithInstance(db.DB, &sqlite.Config{})
 	if err != nil {
-		log.Fatal().Err(err).Msg("problem setting up driver for migrations")
+		log.Fatal().Str("datasource", datasource).Err(err).Msg("problem setting up driver for migrations")
 	}
 
 	//	Format migration source:

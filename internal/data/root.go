@@ -46,7 +46,7 @@ func InitSqlite(datasource string) (*sqlx.DB, error) {
 		log.Fatal().Err(err).Str("datasource", datasource).Msg("Problem connecting to SQLite database")
 	}
 
-	//	Run migrations
+	//	Create a 'driver' object from the existing connection
 	driver, err := sqlite.WithInstance(db.DB, &sqlite.Config{})
 	if err != nil {
 		log.Fatal().Str("datasource", datasource).Err(err).Msg("problem setting up driver for migrations")
@@ -55,6 +55,7 @@ func InitSqlite(datasource string) (*sqlx.DB, error) {
 	//	Format migration source:
 	migrationSource := fmt.Sprintf("file://%s", viper.GetString("datastore.migrationsource"))
 
+	//	Create a new migrator with the driver (and existing connection)
 	migrator, err := migrate.NewWithDatabaseInstance(
 		migrationSource,
 		datasource, driver)
@@ -65,6 +66,7 @@ func InitSqlite(datasource string) (*sqlx.DB, error) {
 			Err(err).Msg("problem creating migrator config")
 	}
 
+	//	Run the migrations
 	err = migrator.Up()
 	switch err {
 	case migrate.ErrNoChange:

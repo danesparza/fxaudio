@@ -5,7 +5,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 func init() {
@@ -16,6 +16,6 @@ func init() {
 		os.Exit(1)
 	}
 
-	viper.SetDefault("datastore.system", path.Join(home, "fxaudio", "db"))
-	viper.SetDefault("datastore.migrationsource", "file://../../scripts/sqlite/migrations")
+	viper.SetDefault("datastore.system", filepath.Join(home, "fxaudio", "db", "fxaudio.db"))
+	viper.SetDefault("datastore.migrationsource", "../../scripts/sqlite/migrations")
 }

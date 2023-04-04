@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -60,8 +61,8 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	//	Set our defaults
-	viper.SetDefault("datastore.system", path.Join(home, "fxaudio", "db"))
-	viper.SetDefault("datastore.migrationsource", "file://./scripts/sqlite/migrations")
+	viper.SetDefault("datastore.system", filepath.Join(home, "fxaudio", "db", "fxaudio.db"))
+	viper.SetDefault("datastore.migrationsource", "./scripts/sqlite/migrations")
 	viper.SetDefault("upload.path", path.Join(home, "fxaudio", "uploads"))
 	viper.SetDefault("upload.bytelimit", 15*1024*1024) // 15MB
 	viper.SetDefault("server.port", 3000)

@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/rs/xid"
 	"github.com/rs/zerolog/log"
@@ -47,7 +48,7 @@ func (a appDataService) GetFile(ctx context.Context, id string) (File, error) {
 	//	Our return item
 	retval := File{}
 
-	query := `select id, filepath, description, created 
+	query := `select id, filepath, description, created, tags
 				from media 
 				where id = $1;`
 
@@ -68,9 +69,17 @@ func (a appDataService) GetFile(ctx context.Context, id string) (File, error) {
 	}()
 
 	for rows.Next() {
-		err = rows.StructScan(&retval)
-		if err != nil {
+		tags := []byte{}
+		if err := rows.Scan(&retval.ID, &retval.FilePath, &retval.Description, &retval.Created, &tags); err != nil {
 			return retval, fmt.Errorf("problem reading into struct: %v", err)
+		}
+
+		//	If we have data in tags ...
+		if tags != nil {
+			//	Unmarshal the JSON tag array
+			if err := json.Unmarshal(tags, &retval.Tags); err != nil {
+				return retval, fmt.Errorf("problem decoding tags for %v: %v", retval.ID, err)
+			}
 		}
 	}
 
@@ -83,7 +92,7 @@ func (a appDataService) GetAllFiles(ctx context.Context) ([]File, error) {
 	//	Our return item
 	retval := []File{}
 
-	query := `select id, filepath, description, created 
+	query := `select id, filepath, description, created, tags
 				from media;`
 
 	stmt, err := a.DB.PreparexContext(ctx, query)
@@ -104,9 +113,17 @@ func (a appDataService) GetAllFiles(ctx context.Context) ([]File, error) {
 
 	for rows.Next() {
 		item := File{}
-		err = rows.StructScan(&item)
-		if err != nil {
+		tags := []byte{}
+		if err := rows.Scan(&item.ID, &item.FilePath, &item.Description, &item.Created, &tags); err != nil {
 			return retval, fmt.Errorf("problem reading into struct: %v", err)
+		}
+
+		//	If we have data in tags ...
+		if tags != nil {
+			//	Unmarshal the JSON tag array
+			if err := json.Unmarshal(tags, &item.Tags); err != nil {
+				return retval, fmt.Errorf("problem decoding tags for %v: %v", item.ID, err)
+			}
 		}
 
 		retval = append(retval, item)
@@ -127,6 +144,30 @@ func (a appDataService) DeleteFile(ctx context.Context, id string) error {
 	}
 
 	_, err = stmt.ExecContext(ctx, id)
+	if err != nil {
+		return fmt.Errorf("problem executing query: %v", err)
+	}
+
+	return nil
+}
+
+// UpdateTags updates the tags for a file
+func (a appDataService) UpdateTags(ctx context.Context, id string, tags []string) error {
+
+	query := `update media
+		set tags = $1
+		where id = $2;`
+
+	stmt, err := a.DB.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	//	Format tags as a json array:
+	jsonTags, _ := json.Marshal(tags)
+
+	//	Set the tags argument as the json array:
+	_, err = stmt.ExecContext(ctx, string(jsonTags), id)
 	if err != nil {
 		return fmt.Errorf("problem executing query: %v", err)
 	}

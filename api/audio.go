@@ -170,6 +170,59 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 
 }
 
+// UpdateTags godoc
+// @Summary Updates tags for a file
+// @Description Updates tags for a file
+// @Tags audio
+// @Accept  json
+// @Produce  json
+// @Param id path string true "The file id to update tags for"
+// @Param endpoint body api.UpdateTagsRequest true "The endpoint url to stream"
+// @Success 200 {object} api.SystemResponse
+// @Failure 400 {object} api.ErrorResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Failure 503 {object} api.ErrorResponse
+// @Router /audio/{id} [post]
+func (service Service) UpdateTags(rw http.ResponseWriter, req *http.Request) {
+
+	//	Get the id from the url (if it's blank, return an error)
+	audioId := chi.URLParam(req, "id")
+
+	if audioId == "" {
+		err := fmt.Errorf("requires an id of a file to update tags for")
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Parse the body to get the tags
+	request := UpdateTagsRequest{}
+	err := json.NewDecoder(req.Body).Decode(&request)
+	if err != nil {
+		err = fmt.Errorf("problem decoding tag update request", err)
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Update the file
+	err = service.DB.UpdateTags(req.Context(), audioId, request.Tags)
+	if err != nil {
+		err = fmt.Errorf("error updating tags: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Construct our response
+	response := SystemResponse{
+		Message: "File updated",
+		Data:    audioId,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+
+}
+
 // PlayAudio godoc
 // @Summary Play an audio file
 // @Description Play an audio file

@@ -1,11 +1,13 @@
 package data_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 func init() {
@@ -18,4 +20,20 @@ func init() {
 
 	viper.SetDefault("datastore.system", filepath.Join(home, "fxaudio", "db", "fxaudio.db"))
 	viper.SetDefault("datastore.migrationsource", "../../scripts/sqlite/migrations")
+}
+
+func TestSliceToJSONArray(t *testing.T) {
+	//	Arrange
+	testSlice := []string{"one", "two", "three"}
+	expectedString := `["one","two","three"]`
+
+	//	Act
+	jsonArray, _ := json.Marshal(testSlice)
+	jsonString := string(jsonArray)
+
+	//	Assert
+	if jsonString != expectedString {
+		t.Errorf("Problem serializing to JSON.  Got %s", jsonString)
+	}
+
 }

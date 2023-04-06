@@ -347,6 +347,63 @@ const docTemplate = `{
             }
         },
         "/audio/{id}": {
+            "post": {
+                "description": "Updates tags for a file",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "audio"
+                ],
+                "summary": "Updates tags for a file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The file id to update tags for",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The endpoint url to stream",
+                        "name": "endpoint",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateTagsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SystemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Deletes a file in the system",
                 "consumes": [
@@ -420,6 +477,17 @@ const docTemplate = `{
                 "data": {},
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "api.UpdateTagsRequest": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

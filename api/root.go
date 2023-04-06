@@ -30,6 +30,11 @@ type PlayAudioRequest struct {
 	Endpoint string `json:"endpoint"`
 }
 
+// UpdateTagsRequest represents a request to update tags for a file
+type UpdateTagsRequest struct {
+	Tags []string `json:"tags"`
+}
+
 // SystemResponse is a response for a system request
 type SystemResponse struct {
 	Message string      `json:"message"`

@@ -102,6 +102,7 @@ func start(cmd *cobra.Command, args []string) {
 		r.Put("/audio", apiService.UploadFile)
 		r.Get("/audio", apiService.ListAllFiles)
 		r.Delete("/audio/{id}", apiService.DeleteFile)
+		r.Post("/audio/{id}", apiService.UpdateTags)
 
 		//	Play audio
 		r.Post("/audio/play", apiService.PlayRandomAudio)

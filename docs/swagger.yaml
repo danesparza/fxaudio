@@ -16,6 +16,13 @@ definitions:
       message:
         type: string
     type: object
+  api.UpdateTagsRequest:
+    properties:
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
 info:
   contact: {}
   description: fxAudio multichannel audio REST service
@@ -107,6 +114,44 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Deletes a file in the system
+      tags:
+      - audio
+    post:
+      consumes:
+      - application/json
+      description: Updates tags for a file
+      parameters:
+      - description: The file id to update tags for
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The endpoint url to stream
+        in: body
+        name: endpoint
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Updates tags for a file
       tags:
       - audio
   /audio/loop/{id}/{loopTimes}:

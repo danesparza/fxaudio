@@ -198,7 +198,7 @@ func (service Service) UpdateTags(rw http.ResponseWriter, req *http.Request) {
 	request := UpdateTagsRequest{}
 	err := json.NewDecoder(req.Body).Decode(&request)
 	if err != nil {
-		err = fmt.Errorf("problem decoding tag update request", err)
+		err = fmt.Errorf("problem decoding tag update request: %v", err)
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}

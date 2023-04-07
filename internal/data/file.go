@@ -133,6 +133,53 @@ func (a appDataService) GetAllFiles(ctx context.Context) ([]File, error) {
 	return retval, nil
 }
 
+// GetAllFilesWithTag gets all files in the system
+func (a appDataService) GetAllFilesWithTag(ctx context.Context, tag string) ([]File, error) {
+	//	Our return item
+	retval := []File{}
+
+	query := `select media.id, media.filepath, media.description, media.created, media.tags
+				from media, json_each(media.tags)
+				where json_each.value LIKE $1;`
+
+	stmt, err := a.DB.PreparexContext(ctx, query)
+	if err != nil {
+		return retval, err
+	}
+
+	rows, err := stmt.QueryxContext(ctx)
+	if err != nil {
+		return retval, err
+	}
+
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			log.Err(closeErr).Msg("unable to close rows")
+		}
+	}()
+
+	for rows.Next() {
+		item := File{}
+		tags := []byte{}
+		if err := rows.Scan(&item.ID, &item.FilePath, &item.Description, &item.Created, &tags); err != nil {
+			return retval, fmt.Errorf("problem reading into struct: %v", err)
+		}
+
+		//	If we have data in tags ...
+		if tags != nil {
+			//	Unmarshal the JSON tag array
+			if err := json.Unmarshal(tags, &item.Tags); err != nil {
+				return retval, fmt.Errorf("problem decoding tags for %v: %v", item.ID, err)
+			}
+		}
+
+		retval = append(retval, item)
+	}
+
+	//	Return our data:
+	return retval, nil
+}
+
 // DeleteFile deletes a file from the system
 func (a appDataService) DeleteFile(ctx context.Context, id string) error {
 

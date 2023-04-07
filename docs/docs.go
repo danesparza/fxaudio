@@ -189,6 +189,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/audio/play/random/{tag}": {
+            "post": {
+                "description": "Play a random file already uploaded (that has a given tag)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "audio"
+                ],
+                "summary": "Play a random file already uploaded (with tag)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Play random audio associated with this tag",
+                        "name": "tag",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SystemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/audio/play/{id}": {
             "post": {
                 "description": "Play an audio file",

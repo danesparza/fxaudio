@@ -249,6 +249,35 @@ paths:
       summary: Play an audio file
       tags:
       - audio
+  /audio/play/random/{tag}:
+    post:
+      consumes:
+      - application/json
+      description: Play a random file already uploaded (that has a given tag)
+      parameters:
+      - description: Play random audio associated with this tag
+        in: path
+        name: tag
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Play a random file already uploaded (with tag)
+      tags:
+      - audio
   /audio/stop:
     post:
       consumes:

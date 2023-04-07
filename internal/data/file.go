@@ -147,7 +147,7 @@ func (a appDataService) GetAllFilesWithTag(ctx context.Context, tag string) ([]F
 		return retval, err
 	}
 
-	rows, err := stmt.QueryxContext(ctx)
+	rows, err := stmt.QueryxContext(ctx, tag)
 	if err != nil {
 		return retval, err
 	}

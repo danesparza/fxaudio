@@ -107,7 +107,7 @@ func start(cmd *cobra.Command, args []string) {
 		//	Play audio
 		r.Post("/audio/play", apiService.PlayRandomAudio)
 		r.Post("/audio/play/{id}", apiService.PlayAudio)
-		r.Post("/audio/play/random/{tag}", apiService.PlayRandomAudio)
+		r.Post("/audio/play/random/{tag}", apiService.PlayRandomAudioWithTag)
 		r.Post("/audio/stream", apiService.StreamAudio)
 		r.Post("/audio/loop/{id}/{loopTimes}", apiService.LoopAudio)
 

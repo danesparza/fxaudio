@@ -16,7 +16,7 @@ require (
 	github.com/sanity-io/litter v1.5.5
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.1
 	modernc.org/sqlite v1.22.1

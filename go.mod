@@ -19,5 +19,5 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.1
-	modernc.org/sqlite v1.23.0
+	modernc.org/sqlite v1.23.1
 )

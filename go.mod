@@ -12,7 +12,7 @@ require (
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/rs/xid v1.5.0
-	github.com/rs/zerolog v1.29.1
+	github.com/rs/zerolog v1.30.0
 	github.com/sanity-io/litter v1.5.5
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0

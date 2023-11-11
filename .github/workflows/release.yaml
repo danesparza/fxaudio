@@ -94,5 +94,45 @@ jobs:
           name: Release binaries
           path: /tmp/binaries
 
+  publish:
+    name: Publish debian package
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - build
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Release binaries
+          path: /tmp/binaries
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/package.key
+          chmod 600 ~/.ssh/package.key
+          cat >>~/.ssh/config <<END
+          Host packagehost
+            Hostname ${{ secrets.SSH_HOST }}
+            User ${{ secrets.SSH_USER }}
+            IdentityFile ~/.ssh/package.key
+            StrictHostKeyChecking no
+          END
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/package.key
+
+      - name: Package pre-refresh step
+        run: ssh packagehost /home/packagerepo/work/package-repo/ci-pre.sh
+
+      - name: Copy artifact
+        run: scp /tmp/binaries/${DEBIAN_PACKAGE_NAME}.deb packagehost:/home/packagerepo/work/package-repo
+
+      - name: Refresh packages
+        run: ssh -tt packagehost /home/packagerepo/work/package-repo/ci-refresh.sh
+
+      - name: Package publish
+        run: ssh packagehost /home/packagerepo/work/package-repo/ci-post.sh
 
 

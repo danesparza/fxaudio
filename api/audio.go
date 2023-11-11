@@ -177,7 +177,7 @@ func (service Service) DeleteFile(rw http.ResponseWriter, req *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "The file id to update tags for"
-// @Param endpoint body api.UpdateTagsRequest true "The endpoint url to stream"
+// @Param endpoint body api.UpdateTagsRequest true "The tags to set for the file"
 // @Success 200 {object} api.SystemResponse
 // @Failure 400 {object} api.ErrorResponse
 // @Failure 500 {object} api.ErrorResponse

@@ -35,7 +35,7 @@ This automatically installs the **fxaudio** service with a default configuration
 
 You can then use the service at http://localhost:3030
 
-See the REST API documentation at http://localhost:3030/v1/swagger/
+See the REST API documentation at http://localhost:3030/swagger/
 
 ## Removing 
 Uninstalling is just as simple:

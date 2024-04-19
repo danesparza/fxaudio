@@ -1,6 +1,7 @@
 Package: fxaudio
 Version: 1.0.{build}
 Architecture: armhf
+Depends: mpg123
 Maintainer: Dan Esparza <esparza.dan@gmail.com>
 Installed-Size: 4500
 Homepage: https://github.com/danesparza/fxaudio

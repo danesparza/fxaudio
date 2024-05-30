@@ -110,6 +110,6 @@ jobs:
 
       - name: Push artifact
         run: |
-          curl -X 'POST' 'https://packassist.cagedtornado.com/v1/package' -H 'accept: application/json' -H 'Content-Type: multipart/form-data' -H 'X-PackAuth: ${{secrets.PACKASSIST_AUTH_TOKEN}}' -F 'file=@/tmp/binaries/${DEBIAN_PACKAGE_NAME}.deb'
+          curl -X 'POST' 'https://packassist.cagedtornado.com/v1/package' -H 'accept: application/json' -H 'Content-Type: multipart/form-data' -H 'X-PackAuth: ${{secrets.PACKASSIST_AUTH_TOKEN}}' -F "file=@/tmp/binaries/${DEBIAN_PACKAGE_NAME}.deb"
 
 

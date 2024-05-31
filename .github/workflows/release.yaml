@@ -108,8 +108,10 @@ jobs:
           name: Release binaries
           path: /tmp/binaries
 
+      - name: Get package pusher
+        run: go install github.com/danesparza/package-pusher@latest
+
       - name: Push artifact
-        run: |
-          cd /tmp/binaries; curl -X 'POST' 'https://packassist.cagedtornado.com/v1/package' -H 'accept: application/json' -H 'Content-Type: multipart/form-data' -H 'X-PackAuth: ${{secrets.PACKASSIST_AUTH_TOKEN}}' -F "file=@${DEBIAN_PACKAGE_NAME}.deb"
+        run: package-pusher -file /tmp/binaries/${DEBIAN_PACKAGE_NAME}.deb -token ${{secrets.PACKASSIST_AUTH_TOKEN}}
 
 

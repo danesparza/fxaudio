@@ -112,6 +112,6 @@ jobs:
         run: go install github.com/danesparza/package-pusher@latest
 
       - name: Push artifact
-        run: package-pusher -file /tmp/binaries/${DEBIAN_PACKAGE_NAME}.deb -token ${{secrets.PACKASSIST_AUTH_TOKEN}}
+        run: export PATH=${PATH}:`go env GOPATH`/bin; package-pusher -file /tmp/binaries/${DEBIAN_PACKAGE_NAME}.deb -token ${{secrets.PACKASSIST_AUTH_TOKEN}}
 
 

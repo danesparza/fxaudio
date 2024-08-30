@@ -19,7 +19,6 @@ func init() {
 	}
 
 	viper.SetDefault("datastore.system", filepath.Join(home, "fxaudio", "db", "fxaudio.db"))
-	viper.SetDefault("datastore.migrationsource", "../../scripts/sqlite/migrations")
 }
 
 func TestSliceToJSONArray(t *testing.T) {

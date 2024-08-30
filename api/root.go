@@ -64,16 +64,6 @@ func ShowUI(rw http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(rw, "Hello, world - UI")
 }
 
-// GetIP gets a requests IP address by reading off the forwarded-for
-// header (for proxies) and falls back to use the remote address.
-func GetIP(r *http.Request) string {
-	forwarded := r.Header.Get("X-FORWARDED-FOR")
-	if forwarded != "" {
-		return forwarded
-	}
-	return r.RemoteAddr
-}
-
 // ApiVersionMiddleware adds the API version information to the response header
 func ApiVersionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {

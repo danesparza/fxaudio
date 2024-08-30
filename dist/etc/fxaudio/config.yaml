@@ -3,7 +3,6 @@ server:
   allowed-origins: "*"
 datastore:
   system: /var/lib/fxaudio/db/fxaudio.db
-  migrationsource: /var/lib/fxaudio/scripts/sqlite/migrations
 upload:
   path: /var/lib/fxaudio/uploads
   bytelimit: 15728640

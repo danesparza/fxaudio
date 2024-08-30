@@ -62,7 +62,6 @@ func initConfig() {
 
 	//	Set our defaults
 	viper.SetDefault("datastore.system", filepath.Join(home, "fxaudio", "db", "fxaudio.db"))
-	viper.SetDefault("datastore.migrationsource", "./scripts/sqlite/migrations")
 	viper.SetDefault("upload.path", path.Join(home, "fxaudio", "uploads"))
 	viper.SetDefault("upload.bytelimit", 15*1024*1024) // 15MB
 	viper.SetDefault("server.port", 3000)

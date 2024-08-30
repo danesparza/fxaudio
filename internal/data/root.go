@@ -2,13 +2,13 @@ package data
 
 import (
 	"context"
-	"fmt"
+	"github.com/danesparza/fxaudio/scripts"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file" // Add the file migrations source to golang-migrate
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 	_ "modernc.org/sqlite" // Register relevant drivers.
 	"os"
 	"path/filepath"
@@ -25,6 +25,19 @@ type AppDataService interface {
 
 type appDataService struct {
 	*sqlx.DB
+}
+
+// InitConfig performs runtime config
+func (a appDataService) InitRuntimeConfig() error {
+
+	/* Turn on foreign key support (I can't believe we have to do this) */
+	/* More information: https://www.sqlite.org/foreignkeys.html */
+	_, err := a.DB.Exec(`PRAGMA foreign_keys = ON;`)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewAppDataService(db *sqlx.DB) AppDataService {
@@ -48,23 +61,27 @@ func InitSqlite(datasource string) (*sqlx.DB, error) {
 		log.Fatal().Err(err).Str("datasource", datasource).Msg("Problem connecting to SQLite database")
 	}
 
-	//	Create a 'driver' object from the existing connection
-	driver, err := sqlite.WithInstance(db.DB, &sqlite.Config{})
+	//	Create a 'databaseDriver' object from the existing connection
+	databaseDriver, err := sqlite.WithInstance(db.DB, &sqlite.Config{})
 	if err != nil {
-		log.Fatal().Str("datasource", datasource).Err(err).Msg("problem setting up driver for migrations")
+		log.Fatal().Str("datasource", datasource).Err(err).Msg("problem setting up databaseDriver for migrations")
 	}
 
-	//	Format migration source:
-	migrationSource := fmt.Sprintf("file://%s", viper.GetString("datastore.migrationsource"))
+	//	Create the new migration source
+	sourceDriver, err := iofs.New(scripts.FS, "sqlite/migrations")
+	if err != nil {
+		log.Fatal().Err(err).
+			Str("datasource", datasource).
+			Str("migrationsource", "(iofs)sqlite/migrations").
+			Msg("problem setting up migration source")
+	}
 
-	//	Create a new migrator with the driver (and existing connection)
-	migrator, err := migrate.NewWithDatabaseInstance(
-		migrationSource,
-		datasource, driver)
+	//	Create a new migrator with the databaseDriver (and existing connection)
+	migrator, err := migrate.NewWithInstance("iofs", sourceDriver, datasource, databaseDriver)
 	if err != nil {
 		log.Fatal().
 			Str("datasource", datasource).
-			Str("migrationSource", migrationSource).
+			Str("migrationsource", "(iofs)sqlite/migrations").
 			Err(err).Msg("problem creating migrator config")
 	}
 

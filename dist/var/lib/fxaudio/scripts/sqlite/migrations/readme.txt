@@ -1,1 +1,0 @@
-This contains migration scripts for the SQLite database used.

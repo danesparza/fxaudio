@@ -47,6 +47,9 @@ func NewRouter(apiService Service) http.Handler {
 		//	Stop audio
 		r.Post("/audio/stop", apiService.StopAllAudio)
 		r.Post("/audio/stop/{id}", apiService.StopAudio)
+
+		//	System management
+		r.Get("/system/alsadevices", apiService.GetAlsaDevices)
 	})
 
 	//	SWAGGER

@@ -126,7 +126,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: The endpoint url to stream
+      - description: The tags to set for the file
         in: body
         name: endpoint
         required: true
@@ -348,4 +348,23 @@ paths:
       summary: Stream from an audio endpoint
       tags:
       - audio
+  /system/alsadevices:
+    get:
+      consumes:
+      - application/json
+      description: List all ALSA devices in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List all ALSA devices in the system
+      tags:
+      - system
 swagger: "2.0"

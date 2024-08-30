@@ -404,7 +404,7 @@
                         "required": true
                     },
                     {
-                        "description": "The endpoint url to stream",
+                        "description": "The tags to set for the file",
                         "name": "endpoint",
                         "in": "body",
                         "required": true,
@@ -482,6 +482,35 @@
                     },
                     "503": {
                         "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/alsadevices": {
+            "get": {
+                "description": "List all ALSA devices in the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "List all ALSA devices in the system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SystemResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/api.ErrorResponse"
                         }

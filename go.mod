@@ -3,7 +3,7 @@ module github.com/danesparza/fxaudio
 go 1.16
 
 require (
-	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/hashicorp/go-version v1.6.0
@@ -18,6 +18,6 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/http-swagger v1.3.4
-	github.com/swaggo/swag v1.16.1
+	github.com/swaggo/swag v1.16.2
 	modernc.org/sqlite v1.23.1
 )

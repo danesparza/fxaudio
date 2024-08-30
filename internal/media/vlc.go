@@ -4,6 +4,10 @@ import (
 	"context"
 )
 
+//	Additional references:
+//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
+//	https://wiki.videolan.org/VLC_command-line_help/
+
 type VLCAudioService interface {
 	PlayAudio(ctx context.Context, loop bool, audioFilePath string) error
 	StreamAudio(ctx context.Context, audioStreamUrl string) error

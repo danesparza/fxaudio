@@ -2,6 +2,7 @@ Package: fxaudio
 Version: 1.0.{build}
 Architecture: armhf
 Maintainer: Dan Esparza <esparza.dan@gmail.com>
+Depends: vlc-bin, vlc-plugin-base
 Installed-Size: 4500
 Homepage: https://github.com/danesparza/fxaudio
 Description: REST service for multichannel audio on demand from Raspberry Pi

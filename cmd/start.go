@@ -63,11 +63,19 @@ func start(cmd *cobra.Command, args []string) {
 	//	Init the AppDataService
 	appdata := data.NewAppDataService(db)
 
+	//	Create a background service object
+	backgroundService := media.BackgroundProcess{
+		PlayAudio:    make(chan media.PlayAudioRequest),
+		StopAudio:    make(chan string),
+		StopAllAudio: make(chan bool),
+		DB:           appdata,
+	}
+
 	//	Create an api service object
 	apiService := api.Service{
-		PlayMedia:    make(chan media.PlayAudioRequest),
-		StopMedia:    make(chan string),
-		StopAllMedia: make(chan bool),
+		PlayMedia:    backgroundService.PlayAudio,
+		StopMedia:    backgroundService.StopAudio,
+		StopAllMedia: backgroundService.StopAllAudio,
 		DB:           appdata,
 		StartTime:    time.Now(),
 	}
@@ -76,7 +84,7 @@ func start(cmd *cobra.Command, args []string) {
 	r := api.NewRouter(apiService)
 
 	//	Start the media processor:
-	go media.HandleAndProcess(ctx, apiService.PlayMedia, apiService.StopMedia, apiService.StopAllMedia)
+	go backgroundService.HandleAndProcess(ctx)
 
 	//	Format the bound interface:
 	formattedServerPort := fmt.Sprintf(":%v", viper.GetString("server.port"))

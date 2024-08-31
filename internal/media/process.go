@@ -2,7 +2,8 @@ package media
 
 import (
 	"context"
-	"fmt"
+	"github.com/danesparza/fxaudio/internal/data"
+	"github.com/rs/zerolog/log"
 	"os/exec"
 	"sync"
 )
@@ -19,16 +20,35 @@ type audioProcessMap struct {
 	rwMutex sync.RWMutex
 }
 
+// BackgroundProcess encapsulates background processing operations
+type BackgroundProcess struct {
+	// DB is the system datastore reference
+	DB data.AppDataService
+
+	// PlayAudio signals audio should be played
+	PlayAudio chan PlayAudioRequest
+
+	// StopAudio signals a running audio process should be stopped
+	StopAudio chan string
+
+	// StopAllAudio signals all running audio should be stopped
+	StopAllAudio chan bool
+
+	// PlayingTimelines tracks currently playing timelines
+	PlayingAudio audioProcessMap
+}
+
 // HandleAndProcess handles system context calls and channel events to play/stop audio
-func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest, stopaudio chan string, stopallaudio chan bool) {
+func (bp *BackgroundProcess) HandleAndProcess(systemctx context.Context) {
 
 	//	Create a map of running instances and their cancel functions
-	playingAudio := audioProcessMap{m: make(map[string]func())}
+	bp.PlayingAudio.m = make(map[string]func())
+	log.Info().Msg("Starting audio processor...")
 
 	//	Loop and respond to channels:
 	for {
 		select {
-		case playReq := <-playaudio:
+		case playReq := <-bp.PlayAudio:
 			//	As we get a request on a channel to play a file...
 			//	Spawn a goroutine
 			go func(cx context.Context, req PlayAudioRequest) {
@@ -40,44 +60,44 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 				//	- key: instance id
 				//	- value: the cancel function (pointer)
 				//	(critical section)
-				playingAudio.rwMutex.Lock()
-				playingAudio.m[req.ProcessID] = cancel
-				playingAudio.rwMutex.Unlock()
+				bp.PlayingAudio.rwMutex.Lock()
+				bp.PlayingAudio.m[req.ProcessID] = cancel
+				bp.PlayingAudio.rwMutex.Unlock()
 
 				//	Create the command with context and play the audio
 				playCommand := exec.CommandContext(ctx, "mpg123", "--loop", playReq.LoopTimes, playReq.FilePath)
 
 				if err := playCommand.Run(); err != nil {
 					//	Log an error playing a file
-					fmt.Printf("error playing %v: %v", playReq.FilePath, err)
+					log.Err(err).Str("filepath", playReq.FilePath).Msg("problem playing audio")
 				}
 
 				//	Remove ourselves from the map and exit (critical section)
-				playingAudio.rwMutex.Lock()
-				delete(playingAudio.m, req.ProcessID)
-				playingAudio.rwMutex.Unlock()
+				bp.PlayingAudio.rwMutex.Lock()
+				delete(bp.PlayingAudio.m, req.ProcessID)
+				bp.PlayingAudio.rwMutex.Unlock()
 
 			}(systemctx, playReq) // Launch the goroutine
 
-		case stopFile := <-stopaudio:
+		case stopFile := <-bp.StopAudio:
 			//	Look up the item in the map and call cancel if the item exists (critical section):
-			playingAudio.rwMutex.Lock()
-			playCancel, exists := playingAudio.m[stopFile]
+			bp.PlayingAudio.rwMutex.Lock()
+			playCancel, exists := bp.PlayingAudio.m[stopFile]
 
 			if exists {
 				//	Call the context cancellation function
 				playCancel()
 
 				//	Remove ourselves from the map and exit
-				delete(playingAudio.m, stopFile)
+				delete(bp.PlayingAudio.m, stopFile)
 			}
-			playingAudio.rwMutex.Unlock()
+			bp.PlayingAudio.rwMutex.Unlock()
 
-		case <-stopallaudio:
+		case <-bp.StopAllAudio:
 			//	Loop through all items in the map and call cancel if the item exists (critical section):
-			playingAudio.rwMutex.Lock()
+			bp.PlayingAudio.rwMutex.Lock()
 
-			for stopFile, playCancel := range playingAudio.m {
+			for stopFile, playCancel := range bp.PlayingAudio.m {
 
 				//	Call the cancel function
 				playCancel()
@@ -85,13 +105,13 @@ func HandleAndProcess(systemctx context.Context, playaudio chan PlayAudioRequest
 				//	Remove ourselves from the map
 				//	(this is safe to do in a 'range':
 				//	https://golang.org/doc/effective_go#for )
-				delete(playingAudio.m, stopFile)
+				delete(bp.PlayingAudio.m, stopFile)
 			}
 
-			playingAudio.rwMutex.Unlock()
+			bp.PlayingAudio.rwMutex.Unlock()
 
 		case <-systemctx.Done():
-			fmt.Println("Stopping audio processor")
+			log.Info().Msg("Stopping audio processor...")
 			return
 		}
 	}

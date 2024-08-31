@@ -2,6 +2,10 @@ package media
 
 import (
 	"context"
+	"fmt"
+	"github.com/rs/zerolog/log"
+	"os/exec"
+	"strings"
 )
 
 //	Additional references:
@@ -9,8 +13,9 @@ import (
 //	https://wiki.videolan.org/VLC_command-line_help/
 
 type VLCAudioService interface {
-	PlayAudio(ctx context.Context, loop bool, audioFilePath string) error
-	StreamAudio(ctx context.Context, audioStreamUrl string) error
+	PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error
+	SetAlsaDevice(alsaDeviceName string)
+	GetAlsaDeviceName() string
 }
 
 type vlcAudioService struct {
@@ -23,20 +28,43 @@ type vlcAudioService struct {
 	alsaDevice string
 }
 
-func (v vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioFilePath string) error {
+func (v *vlcAudioService) SetAlsaDevice(alsaDeviceName string) {
+	v.alsaDevice = alsaDeviceName
+}
+
+func (v *vlcAudioService) GetAlsaDeviceName() string {
+	return v.alsaDevice
+}
+
+func (v *vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error {
 	//	cvlc --play-and-exit -A alsa --alsa-audio-device sysdefault:CARD=sndrpihifiberry /var/lib/fxaudio/uploads/map1.mp3
 	//	to loop, use the --loop flag.  Example: cvlc --play-and-exit --loop -A alsa /var/lib/fxaudio/uploads/map1.mp3
 
-	//TODO implement me
-	panic("implement me")
-}
+	//	Build our argument list
+	args := []string{"--play-and-exit", "-A", "alsa"}
 
-func (v vlcAudioService) StreamAudio(ctx context.Context, audioStreamUrl string) error {
-	//	cvlc --play-and-exit -A alsa --alsa-audio-device sysdefault:CARD=sndrpihifiberry http://ice1.somafm.com/u80s-128-mp3
-	//	It's so simple!
+	//	If we need to loop, indicate that we should
+	if loop {
+		args = append(args, "--loop")
+	}
 
-	//TODO implement me
-	panic("implement me")
+	//	By default, this will use the default alsa device.
+	//	If we have a specific device configured, indicate we should use it
+	if strings.TrimSpace(v.alsaDevice) != "" {
+		args = append(args, "--alsa-audio-device", v.alsaDevice)
+	}
+
+	//	At the end, add the file to play or url to stream
+	args = append(args, audioPathOrUrl)
+
+	//	Finally, run the full command:
+	err := exec.CommandContext(ctx, "cvlc", args...).Run()
+	if err != nil {
+		log.Err(err).Msg("Problem playing audio")
+		return fmt.Errorf("problem playing audio: %w", err)
+	}
+
+	return nil
 }
 
 func NewVLCAudioService(alsaDevice string) VLCAudioService {

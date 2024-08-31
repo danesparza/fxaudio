@@ -253,24 +253,12 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	/*
-		//	Make sure omxplayer is installed (for HDMI based audio)
-		//	Instructions on how to install it:
-		//	https://www.gaggl.com/2013/01/installing-omxplayer-on-raspberry-pi/
-		_, err := exec.LookPath("omxplayer")
-		if err != nil {
-			err = fmt.Errorf("Didn't find omxplayer executable in the path: %v", err)
-			sendErrorResponse(rw, err, http.StatusInternalServerError)
-			return
-		}
-	*/
-
-	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
+	//	Make sure cvlc is installed
 	//	Instructions on how to install it:
-	//	https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-test
-	_, err = exec.LookPath("mpg123")
+	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
+	_, err = exec.LookPath("cvlc")
 	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -280,7 +268,6 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		ProcessID: xid.New().String(), // Generate a new id
 		ID:        fileToPlay.ID,
 		FilePath:  fileToPlay.FilePath,
-		LoopTimes: "1",
 	}
 	service.PlayMedia <- playRequest
 
@@ -307,20 +294,13 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 // @Failure 400 {object} api.ErrorResponse
 // @Failure 500 {object} api.ErrorResponse
 // @Failure 503 {object} api.ErrorResponse
-// @Router /audio/loop/{id}/{loopTimes} [post]
+// @Router /audio/loop/{id} [post]
 func (service Service) LoopAudio(rw http.ResponseWriter, req *http.Request) {
 
 	//	Get the id from the url (if it's blank, return an error)
 	audioId := chi.URLParam(req, "id")
 	if audioId == "" {
 		err := fmt.Errorf("requires an id of a file to loop")
-		sendErrorResponse(rw, err, http.StatusBadRequest)
-		return
-	}
-
-	loopTimes := chi.URLParam(req, "loopTimes")
-	if audioId == "" {
-		err := fmt.Errorf("requires a number of times to loop")
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
@@ -333,12 +313,12 @@ func (service Service) LoopAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
+	//	Make sure cvlc is installed
 	//	Instructions on how to install it:
-	//	https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-test
-	_, err = exec.LookPath("mpg123")
+	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
+	_, err = exec.LookPath("cvlc")
 	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -348,13 +328,13 @@ func (service Service) LoopAudio(rw http.ResponseWriter, req *http.Request) {
 		ProcessID: xid.New().String(), // Generate a new id
 		ID:        fileToPlay.ID,
 		FilePath:  fileToPlay.FilePath,
-		LoopTimes: loopTimes,
+		Loop:      true,
 	}
 	service.PlayMedia <- playRequest
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Audio playing",
+		Message: "Audio looping",
 		Data:    playRequest,
 	}
 
@@ -390,10 +370,12 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Get just the file endpoint:
 	fileendpoint := strings.TrimSpace(request.Endpoint)
 
-	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
-	_, err = exec.LookPath("mpg123")
+	//	Make sure cvlc is installed
+	//	Instructions on how to install it:
+	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
+	_, err = exec.LookPath("cvlc")
 	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -402,13 +384,12 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 	playRequest := media.PlayAudioRequest{
 		ProcessID: xid.New().String(), // Generate a new id
 		FilePath:  fileendpoint,
-		LoopTimes: "1",
 	}
 	service.PlayMedia <- playRequest
 
 	//	Create our response and send information back:
 	response := SystemResponse{
-		Message: "Audio playing",
+		Message: "Audio streaming",
 		Data:    playRequest,
 	}
 
@@ -458,10 +439,12 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 		fileendpoint = retval[randomIndex].FilePath
 	}
 
-	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
-	_, err := exec.LookPath("mpg123")
+	//	Make sure cvlc is installed
+	//	Instructions on how to install it:
+	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
+	_, err := exec.LookPath("cvlc")
 	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -470,7 +453,6 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 	playRequest := media.PlayAudioRequest{
 		ProcessID: xid.New().String(), // Generate a new id
 		FilePath:  fileendpoint,
-		LoopTimes: "1",
 	}
 	service.PlayMedia <- playRequest
 
@@ -535,10 +517,12 @@ func (service Service) PlayRandomAudioWithTag(rw http.ResponseWriter, req *http.
 		fileendpoint = retval[randomIndex].FilePath
 	}
 
-	//	Make sure mpg123 is installed (for i2s / ALSA based digital audio)
-	_, err := exec.LookPath("mpg123")
+	//	Make sure cvlc is installed
+	//	Instructions on how to install it:
+	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
+	_, err := exec.LookPath("cvlc")
 	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
+		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -547,7 +531,6 @@ func (service Service) PlayRandomAudioWithTag(rw http.ResponseWriter, req *http.
 	playRequest := media.PlayAudioRequest{
 		ProcessID: xid.New().String(), // Generate a new id
 		FilePath:  fileendpoint,
-		LoopTimes: "1",
 	}
 	service.PlayMedia <- playRequest
 

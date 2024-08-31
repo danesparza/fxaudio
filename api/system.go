@@ -94,6 +94,9 @@ func (service Service) SetSystemConfig(rw http.ResponseWriter, req *http.Request
 		return
 	}
 
+	//	Update the audio service with the new alsa device name:
+	service.AS.SetAlsaDevice(request.AlsaDevice)
+
 	//	Construct our response
 	response := SystemResponse{
 		Message: fmt.Sprintf("config updated"),

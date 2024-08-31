@@ -63,12 +63,22 @@ func start(cmd *cobra.Command, args []string) {
 	//	Init the AppDataService
 	appdata := data.NewAppDataService(db)
 
+	//	Get the system config:
+	systemConfig, err := appdata.GetConfig(ctx)
+	if err != nil {
+		log.Err(err).Msg("Problem trying to read the system config")
+		return
+	}
+
+	audioSvc := media.NewVLCAudioService(systemConfig.AlsaDevice)
+
 	//	Create a background service object
 	backgroundService := media.BackgroundProcess{
 		PlayAudio:    make(chan media.PlayAudioRequest),
 		StopAudio:    make(chan string),
 		StopAllAudio: make(chan bool),
 		DB:           appdata,
+		AS:           audioSvc,
 	}
 
 	//	Create an api service object
@@ -77,6 +87,7 @@ func start(cmd *cobra.Command, args []string) {
 		StopMedia:    backgroundService.StopAudio,
 		StopAllMedia: backgroundService.StopAllAudio,
 		DB:           appdata,
+		AS:           audioSvc,
 		StartTime:    time.Now(),
 	}
 

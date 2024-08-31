@@ -4,15 +4,14 @@ import (
 	"context"
 	"github.com/danesparza/fxaudio/internal/data"
 	"github.com/rs/zerolog/log"
-	"os/exec"
 	"sync"
 )
 
 type PlayAudioRequest struct {
-	ProcessID string `json:"pid"`       // Unique Internal Process ID
-	ID        string `json:"id"`        // Unique File ID
-	FilePath  string `json:"filepath"`  // Full filepath to the file
-	LoopTimes string `json:"looptimes"` // Number of times to loop.  Default: 1 (only play once)
+	ProcessID string `json:"pid"`      // Unique Internal Process ID
+	ID        string `json:"id"`       // Unique File ID
+	FilePath  string `json:"filepath"` // Full filepath to the file
+	Loop      bool   `json:"loop"`     // Number of times to loop.  Default: 1 (only play once)
 }
 
 type audioProcessMap struct {
@@ -24,6 +23,9 @@ type audioProcessMap struct {
 type BackgroundProcess struct {
 	// DB is the system datastore reference
 	DB data.AppDataService
+
+	// AS is the audio service to play audio files and streams
+	AS VLCAudioService
 
 	// PlayAudio signals audio should be played
 	PlayAudio chan PlayAudioRequest
@@ -64,10 +66,8 @@ func (bp *BackgroundProcess) HandleAndProcess(systemctx context.Context) {
 				bp.PlayingAudio.m[req.ProcessID] = cancel
 				bp.PlayingAudio.rwMutex.Unlock()
 
-				//	Create the command with context and play the audio
-				playCommand := exec.CommandContext(ctx, "mpg123", "--loop", playReq.LoopTimes, playReq.FilePath)
-
-				if err := playCommand.Run(); err != nil {
+				//	Play the audio from the request:
+				if err := bp.AS.PlayAudio(ctx, playReq.Loop, playReq.FilePath); err != nil {
 					//	Log an error playing a file
 					log.Err(err).Str("filepath", playReq.FilePath).Msg("problem playing audio")
 				}

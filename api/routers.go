@@ -42,7 +42,7 @@ func NewRouter(apiService Service) http.Handler {
 		r.Post("/audio/play/{id}", apiService.PlayAudio)
 		r.Post("/audio/play/random/{tag}", apiService.PlayRandomAudioWithTag)
 		r.Post("/audio/stream", apiService.StreamAudio)
-		r.Post("/audio/loop/{id}/{loopTimes}", apiService.LoopAudio)
+		r.Post("/audio/loop/{id}", apiService.LoopAudio)
 
 		//	Stop audio
 		r.Post("/audio/stop", apiService.StopAllAudio)

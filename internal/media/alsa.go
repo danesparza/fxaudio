@@ -37,7 +37,7 @@ func GetAlsaDevices(ctx context.Context) ([]string, error) {
 	}
 
 	//	Parse each line of the output
-	retval = ParseCliOutput(cmdGrep.String())
+	retval = ParseCliOutput(grepOut.String())
 
 	return retval, nil
 }

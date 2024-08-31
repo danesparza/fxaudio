@@ -24,14 +24,15 @@ Run `speaker-test -c2` to generate white noise out of the speaker, alternating l
 You can do a test with streaming music using `mpg123 http://ice1.somafm.com/u80s-128-mp3`
 
 ## Installing
-Installing fxaudio is also really simple.  Grab the .deb file from the [latest release](https://github.com/danesparza/fxaudio/releases/latest) and then install it using dpkg:
-
-
-```bash
-sudo dpkg -i fxaudio-1.0.40_armhf.deb 
-````
-
-This automatically installs the **fxaudio** service with a default configuration and starts the service. 
+Install the package repo (you only need to do this once per machine)
+```
+wget https://packages.cagedtornado.com/prereq.sh -O - | sh
+```
+Install the package
+```
+sudo apt install fxaudio
+```
+This automatically installs the latest **fxaudio** service with a default configuration and starts the service. 
 
 You can then use the service at http://localhost:3030
 

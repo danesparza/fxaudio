@@ -28,7 +28,7 @@ func (service Service) GetAlsaDevices(rw http.ResponseWriter, req *http.Request)
 
 	//	Construct our response
 	response := SystemResponse{
-		Message: fmt.Sprintf("%v devices(s)", len(retval)),
+		Message: fmt.Sprintf("%v device(s)", len(retval)),
 		Data:    retval,
 	}
 

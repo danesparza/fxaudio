@@ -50,6 +50,8 @@ func NewRouter(apiService Service) http.Handler {
 
 		//	System management
 		r.Get("/system/alsadevices", apiService.GetAlsaDevices)
+		r.Get("/system/config", apiService.GetSystemConfig)
+		r.Put("/system/config", apiService.SetSystemConfig)
 	})
 
 	//	SWAGGER

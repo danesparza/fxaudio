@@ -1,3 +1,6 @@
+/* Turn on foreign key support (I can't believe we have to do this) */
+/* More information: https://www.sqlite.org/foreignkeys.html */
+PRAGMA foreign_keys = ON;
 
 /* Database creation and initialization */
 create table media

@@ -21,6 +21,8 @@ type AppDataService interface {
 	GetAllFilesWithTag(ctx context.Context, tag string) ([]File, error)
 	DeleteFile(ctx context.Context, id string) error
 	UpdateTags(ctx context.Context, id string, tags []string) error
+	GetConfig(ctx context.Context) (SystemConfig, error)
+	SetConfig(ctx context.Context, config SystemConfig) error
 }
 
 type appDataService struct {

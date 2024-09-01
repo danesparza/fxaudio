@@ -5,8 +5,8 @@
 # First, vlc can't be called by the 'root' user, so we need to create a user.
 # Second, the user we create has to be in the 'audio' group in order to use ALSA devices
 
-# Create the user fxaudio if it doesn't exist:
-id -u fxaudio &>/dev/null || sudo useradd fxaudio
+# Create the user fxaudio if it doesn't already exist:
+sudo id -u fxaudio >/dev/null 2>&1 || sudo useradd fxaudio
 
 # Add fxaudio to the audio group
 sudo usermod -aG audio fxaudio

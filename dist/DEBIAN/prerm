@@ -1,4 +1,3 @@
 #!/bin/sh
 systemctl stop fxaudio.service
 systemctl disable fxaudio.service
-sudo userdel fxaudio

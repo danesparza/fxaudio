@@ -51,6 +51,7 @@ func (bp *BackgroundProcess) HandleAndProcess(systemctx context.Context) {
 	for {
 		select {
 		case playReq := <-bp.PlayAudio:
+			log.Info().Str("pid", playReq.ProcessID).Msg("request to play")
 			//	As we get a request on a channel to play a file...
 			//	Spawn a goroutine
 			go func(cx context.Context, req PlayAudioRequest) {

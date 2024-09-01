@@ -58,9 +58,9 @@ func (v *vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrU
 	args = append(args, audioPathOrUrl)
 
 	//	Finally, run the full command:
-	err := exec.CommandContext(ctx, "cvlc", args...).Run()
+	_, err := exec.CommandContext(ctx, "cvlc", args...).Output()
 	if err != nil {
-		log.Err(err).Msg("Problem playing audio")
+		log.Err(err).Strs("args", args).Msg("Problem playing audio")
 		return fmt.Errorf("problem playing audio: %w", err)
 	}
 

@@ -77,7 +77,7 @@ jobs:
         run: go mod download
 
       - name: Create binaries for all platforms
-        run: mkdir -p /tmp/binaries; gox -osarch="linux/arm darwin/amd64" -ldflags "-X ${PACKAGE_PATH}/version.BuildNumber=${GITHUB_RUN_NUMBER} -X ${PACKAGE_PATH}/version.CommitID=${GITHUB_SHA} -X '${PACKAGE_PATH}/version.Prerelease=-'" -output "/tmp/binaries/${APP_NAME}_{{.OS}}_{{.Arch}}" $PACKAGE_PATH/...
+        run: mkdir -p /tmp/binaries; gox -osarch="linux/arm64" -ldflags "-X ${PACKAGE_PATH}/version.BuildNumber=${GITHUB_RUN_NUMBER} -X ${PACKAGE_PATH}/version.CommitID=${GITHUB_SHA} -X '${PACKAGE_PATH}/version.Prerelease=-'" -output "/tmp/binaries/${APP_NAME}_{{.OS}}_{{.Arch}}" $PACKAGE_PATH/...
 
       - name: Setup the debian package
         run: mkdir -p "/tmp/packagestage"; cp -r ./dist "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/preinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/postinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/prerm"; tokenreplace -file "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/control" -token="{build}" -replacement="${GITHUB_RUN_NUMBER}";

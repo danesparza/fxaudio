@@ -21,7 +21,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '>=1.19.1'
+          go-version: '>=1.22.3'
           check-latest: true
 
       - name: Get scanner tool
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.19.x'
+          go-version: '1.22.3'
 
       - name: Get dependencies
         run: go mod download
@@ -62,7 +62,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.19.x'
+          go-version: '1.22.3'
 
       - name: Get compiler tool
         run: go install github.com/mitchellh/gox@latest

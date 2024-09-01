@@ -39,6 +39,10 @@ func (a audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl s
 		return fmt.Errorf("problem playing audio: %w", err)
 	}
 
+	if out.String() != "" {
+		log.Info().Str("stdout", out.String()).Msg("Output from PlayAudio")
+	}
+
 	return nil
 }
 

@@ -2,8 +2,8 @@
 Description=fxAudio service
 
 [Service]
-User=root
-Group=root
+User=fxaudio
+Group=audio
 ExecStart=/usr/bin/fxaudio start --config=/etc/fxaudio/config.yaml
 Restart=on-failure
 RestartSec=5s

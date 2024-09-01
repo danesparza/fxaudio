@@ -23,11 +23,6 @@ definitions:
           type: string
         type: array
     type: object
-  data.SystemConfig:
-    properties:
-      alsa_device:
-        type: string
-    type: object
 info:
   contact: {}
   description: fxAudio multichannel audio REST service
@@ -159,7 +154,7 @@ paths:
       summary: Updates tags for a file
       tags:
       - audio
-  /audio/loop/{id}/{loopTimes}:
+  /audio/loop/{id}:
     post:
       consumes:
       - application/json
@@ -353,67 +348,4 @@ paths:
       summary: Stream from an audio endpoint
       tags:
       - audio
-  /system/alsadevices:
-    get:
-      consumes:
-      - application/json
-      description: List all ALSA devices in the system
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.SystemResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrorResponse'
-      summary: List all ALSA devices in the system
-      tags:
-      - system
-  /system/config:
-    get:
-      consumes:
-      - application/json
-      description: Gets the system configuration info
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.SystemResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrorResponse'
-      summary: Gets the system configuration info
-      tags:
-      - system
-    put:
-      consumes:
-      - application/json
-      description: Updates the system configuration info
-      parameters:
-      - description: The system config information
-        in: body
-        name: endpoint
-        required: true
-        schema:
-          $ref: '#/definitions/data.SystemConfig'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.SystemResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrorResponse'
-      summary: Updates the system configuration info
-      tags:
-      - system
 swagger: "2.0"

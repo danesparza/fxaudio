@@ -96,7 +96,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/audio/loop/{id}/{loopTimes}": {
+        "/audio/loop/{id}": {
             "post": {
                 "description": "Play an audio file over and over.  (-1 to loop until stopped)",
                 "consumes": [
@@ -495,102 +495,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/system/alsadevices": {
-            "get": {
-                "description": "List all ALSA devices in the system",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "system"
-                ],
-                "summary": "List all ALSA devices in the system",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.SystemResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/api.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/system/config": {
-            "get": {
-                "description": "Gets the system configuration info",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "system"
-                ],
-                "summary": "Gets the system configuration info",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.SystemResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/api.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Updates the system configuration info",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "system"
-                ],
-                "summary": "Updates the system configuration info",
-                "parameters": [
-                    {
-                        "description": "The system config information",
-                        "name": "endpoint",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/data.SystemConfig"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.SystemResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/api.ErrorResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -627,14 +531,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "data.SystemConfig": {
-            "type": "object",
-            "properties": {
-                "alsa_device": {
-                    "type": "string"
                 }
             }
         }

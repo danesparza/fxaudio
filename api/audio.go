@@ -253,12 +253,10 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//	Make sure cvlc is installed
-	//	Instructions on how to install it:
-	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
-	_, err = exec.LookPath("cvlc")
+	//	Make sure mpg123 is installed
+	_, err = exec.LookPath("mpg123")
 	if err != nil {
-		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -313,12 +311,10 @@ func (service Service) LoopAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//	Make sure cvlc is installed
-	//	Instructions on how to install it:
-	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
-	_, err = exec.LookPath("cvlc")
+	//	Make sure mpg123 is installed
+	_, err = exec.LookPath("mpg123")
 	if err != nil {
-		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -370,12 +366,10 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Get just the file endpoint:
 	fileendpoint := strings.TrimSpace(request.Endpoint)
 
-	//	Make sure cvlc is installed
-	//	Instructions on how to install it:
-	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
-	_, err = exec.LookPath("cvlc")
+	//	Make sure mpg123 is installed
+	_, err = exec.LookPath("mpg123")
 	if err != nil {
-		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -439,12 +433,10 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 		fileendpoint = retval[randomIndex].FilePath
 	}
 
-	//	Make sure cvlc is installed
-	//	Instructions on how to install it:
-	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
-	_, err := exec.LookPath("cvlc")
+	//	Make sure mpg123 is installed
+	_, err := exec.LookPath("mpg123")
 	if err != nil {
-		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}
@@ -517,12 +509,10 @@ func (service Service) PlayRandomAudioWithTag(rw http.ResponseWriter, req *http.
 		fileendpoint = retval[randomIndex].FilePath
 	}
 
-	//	Make sure cvlc is installed
-	//	Instructions on how to install it:
-	//	https://www.raspberrypi.com/documentation/computers/os.html#play-audio-and-video-on-raspberry-pi-os-lite
-	_, err := exec.LookPath("cvlc")
+	//	Make sure mpg123 is installed
+	_, err := exec.LookPath("mpg123")
 	if err != nil {
-		err = fmt.Errorf("didn't find cvlc executable in the path: %v", err)
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
 		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
 		return
 	}

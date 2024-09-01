@@ -60,17 +60,9 @@ func start(cmd *cobra.Command, args []string) {
 	}
 	defer db.Close()
 
-	//	Init the AppDataService
+	//	Init the AppDataService and the Audio service
 	appdata := data.NewAppDataService(db)
-
-	//	Get the system config:
-	systemConfig, err := appdata.GetConfig(ctx)
-	if err != nil {
-		log.Err(err).Msg("Problem trying to read the system config")
-		return
-	}
-
-	audioSvc := media.NewVLCAudioService(systemConfig.AlsaDevice)
+	audioSvc := media.NewAudioService()
 
 	//	Create a background service object
 	backgroundService := media.BackgroundProcess{

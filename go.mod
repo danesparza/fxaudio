@@ -9,7 +9,6 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/hashicorp/go-version v1.6.0
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/rs/xid v1.5.0
 	github.com/rs/zerolog v1.30.0
@@ -22,5 +21,5 @@ require (
 	github.com/swaggo/swag v1.16.3
 	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
-	modernc.org/sqlite v1.23.1
+	modernc.org/sqlite v1.32.0
 )

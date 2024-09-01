@@ -1,6 +1,7 @@
 package media
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/rs/zerolog/log"
@@ -58,9 +59,15 @@ func (v *vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrU
 	args = append(args, audioPathOrUrl)
 
 	//	Finally, run the full command:
-	_, err := exec.CommandContext(ctx, "cvlc", args...).Output()
+	cmd := exec.CommandContext(ctx, "cvlc", args...)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
 	if err != nil {
-		log.Err(err).Strs("args", args).Msg("Problem playing audio")
+		log.Err(err).Str("stderr", stderr.String()).Strs("args", args).Msg("Problem playing audio")
 		return fmt.Errorf("problem playing audio: %w", err)
 	}
 

@@ -34,7 +34,7 @@ Install the package
 ```
 sudo apt install fxaudio
 ```
-This automatically installs the latest **fxaudio** service with a default configuration and starts the service. 
+This automatically installs the latest **fxaudio** service with a default configuration, and starts the service as the `fxaudio` user. 
 
 You can then use the service at http://localhost:3030
 

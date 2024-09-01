@@ -18,7 +18,7 @@ Make sure that you have a stock Raspberry Pi installation and [make sure you hav
 You can do a streaming music test with the first HDMI port on the device (HDMI 0): `cvlc --play-and-exit -A alsa --alsa-audio-device sysdefault:CARD=vc4hdmi0 http://ice1.somafm.com/u80s-128-mp3`
 
 #### Option 2: Using the speaker bonnet
-I would recommend using the [Adafruit Speaker Bonnet for Raspberry Pi](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview) as well -- just get a [Pi with headers](https://www.adafruit.com/product/3708) and slide the bonnet right down on top of it (and be sure to follow the [Raspberry Pi OS configuration instructions](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-usage) for the board).  I used a pair of [8 ohm 3" speakers](https://www.adafruit.com/product/1313) with the bonnet. 
+I would recommend using the [Adafruit Speaker Bonnet for Raspberry Pi](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview) as well -- just get a [Pi with headers](https://www.adafruit.com/product/3708) and slide the bonnet right down on top of it (and be sure to follow the [Raspberry Pi OS configuration instructions](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-usage) for the board).  I used a pair of [8 ohm 3" speakers](https://www.adafruit.com/product/1313) with the bonnet and it's reasonably loud. 
 
 You can do a test with streaming music using `cvlc --play-and-exit -A alsa --loop http://ice1.somafm.com/u80s-128-mp3`
 

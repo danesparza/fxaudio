@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -44,12 +45,14 @@ func start(cmd *cobra.Command, args []string) {
 	systemdb := viper.GetString("datastore.system")
 	uploadPath := viper.GetString("upload.path")
 	uploadByteLimit := viper.GetString("upload.bytelimit")
+	maxProcs := runtime.GOMAXPROCS(0)
 
 	//	Emit what we know:
 	log.Info().
 		Str("systemdb", systemdb).
 		Str("uploadPath", uploadPath).
 		Str("uploadByteLimit", uploadByteLimit).
+		Int("GOMAXPROCS", maxProcs).
 		Msg("Config")
 
 	//	Init SQLite

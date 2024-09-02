@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"os/exec"
+	"syscall"
 )
 
 type AudioService interface {
@@ -28,6 +29,12 @@ func (a audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl s
 
 	//	Finally, run the full command:
 	cmd := exec.CommandContext(ctx, "mpg123", args...)
+
+	//	 See https://hackernoon.com/everything-you-need-to-know-about-managing-go-processes
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out

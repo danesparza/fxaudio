@@ -34,6 +34,8 @@ func (a audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl s
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
+	log.Info().Strs("args", args).Msg("Playing audio")
+
 	err := cmd.Run()
 	if err != nil {
 		log.Err(err).Str("stderr", stderr.String()).Strs("args", args).Msg("Problem playing audio")

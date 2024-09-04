@@ -46,6 +46,8 @@ func (a audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl s
 		log.Info().Str("stdout", out.String()).Str("stderr", stderr.String()).Msg("Output from PlayAudio")
 	}
 
+	log.Info().Str("audioPathOrUrl", audioPathOrUrl).Msg("Played audio")
+
 	return nil
 }
 

@@ -16,7 +16,7 @@ type audioService struct{}
 
 func (a audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error {
 	//	Build our argument list
-	args := []string{"-dm", "mpg123"}
+	args := []string{}
 
 	//	If we need to loop, indicate that we should
 	if loop {
@@ -27,7 +27,7 @@ func (a audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl s
 	args = append(args, audioPathOrUrl)
 
 	//	Finally, run the full command:
-	cmd := exec.CommandContext(ctx, "screen", args...)
+	cmd := exec.CommandContext(ctx, "mpg123", args...)
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer

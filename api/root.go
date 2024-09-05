@@ -13,7 +13,6 @@ import (
 // Service encapsulates API service operations
 type Service struct {
 	DB        data.AppDataService
-	AS        media.AudioService
 	StartTime time.Time
 
 	// PlayMedia signals a file should be played

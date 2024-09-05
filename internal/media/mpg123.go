@@ -3,8 +3,8 @@ package media
 import (
 	"context"
 	"fmt"
-	"github.com/aymanbagabas/go-pty"
 	"github.com/rs/zerolog/log"
+	"os/exec"
 )
 
 type AudioService interface {
@@ -25,17 +25,12 @@ func (a audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl s
 	//	At the end, add the file to play or url to stream
 	args = append(args, audioPathOrUrl)
 
-	audioPty, err := pty.New()
+	//	Finally, run the full command:
+	log.Info().Strs("args", args).Msg("Playing audio")
+	err := exec.CommandContext(ctx, "mpg123", args...).Start()
 	if err != nil {
-		log.Err(err).Msg("could not create pty")
-		return fmt.Errorf("could not create pty: %w", err)
-	}
-
-	defer audioPty.Close()
-	c := audioPty.CommandContext(ctx, "mpg123", args...)
-	if err := c.Run(); err != nil {
-		log.Err(err).Msg("could not start mpg123 in pty")
-		return fmt.Errorf("could not start mpg123: %w", err)
+		log.Err(err).Strs("args", args).Msg("Problem playing audio")
+		return fmt.Errorf("problem playing audio: %w", err)
 	}
 
 	log.Info().Str("audioPathOrUrl", audioPathOrUrl).Msg("Played audio")

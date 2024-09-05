@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/danesparza/fxaudio/internal/data"
 	"github.com/rs/zerolog/log"
-	"os/exec"
 	"sync"
 )
 
@@ -68,25 +67,11 @@ func (bp *BackgroundProcess) HandleAndProcess(systemctx context.Context) {
 				bp.PlayingAudio.m[req.ProcessID] = cancel
 				bp.PlayingAudio.rwMutex.Unlock()
 
-				//	Build our argument list
-				args := []string{}
-
-				//	If we need to loop, indicate that we should
-				if req.Loop {
-					args = append(args, "--loop", "-1")
+				//	Play the audio from the request:
+				if err := bp.AS.PlayAudio(ctx, playReq.Loop, playReq.FilePath); err != nil {
+					//	Log an error playing a file
+					log.Err(err).Str("filepath", playReq.FilePath).Msg("problem playing audio")
 				}
-
-				//	At the end, add the file to play or url to stream
-				args = append(args, req.FilePath)
-
-				//	Finally, run the full command:
-				log.Info().Strs("args", args).Msg("Playing audio")
-				err := exec.CommandContext(ctx, "mpg123", args...).Start()
-				if err != nil {
-					log.Err(err).Strs("args", args).Msg("Problem playing audio")
-				}
-
-				log.Info().Str("audioPathOrUrl", req.FilePath).Msg("Played audio")
 
 				//	Remove ourselves from the map and exit (critical section)
 				bp.PlayingAudio.rwMutex.Lock()

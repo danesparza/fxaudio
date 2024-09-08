@@ -82,6 +82,7 @@ func start(cmd *cobra.Command, args []string) {
 		StopMedia:    backgroundService.StopAudio,
 		StopAllMedia: backgroundService.StopAllAudio,
 		DB:           appdata,
+		AS:           audioSvc,
 		StartTime:    time.Now(),
 	}
 

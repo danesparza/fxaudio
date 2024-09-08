@@ -3,8 +3,6 @@ module github.com/danesparza/fxaudio
 go 1.16
 
 require (
-	github.com/aymanbagabas/go-pty v0.2.2
-	github.com/creack/pty v1.1.23 // indirect
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
 	github.com/go-openapi/spec v0.21.0 // indirect

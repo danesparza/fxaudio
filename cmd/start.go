@@ -65,7 +65,7 @@ func start(cmd *cobra.Command, args []string) {
 
 	//	Init the AppDataService and the Audio service
 	appdata := data.NewAppDataService(db)
-	audioSvc := media.NewAudioService()
+	audioSvc := media.NewVLCAudioService()
 
 	//	Create a background service object
 	backgroundService := media.BackgroundProcess{

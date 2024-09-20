@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"os/exec"
-	"strings"
 )
 
 //	Additional references:
@@ -42,7 +41,7 @@ func (v *vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrU
 	//	to loop, use the --loop flag.  Example: cvlc --play-and-exit --loop -A alsa /var/lib/fxaudio/uploads/map1.mp3
 
 	//	Build our argument list
-	args := []string{"--play-and-exit", "-A", "alsa"}
+	args := []string{"--no-one-instance", "--play-and-exit"}
 
 	//	If we need to loop, indicate that we should
 	if loop {
@@ -51,9 +50,9 @@ func (v *vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrU
 
 	//	By default, this will use the default alsa device.
 	//	If we have a specific device configured, indicate we should use it
-	if strings.TrimSpace(v.alsaDevice) != "" {
-		args = append(args, "--alsa-audio-device", v.alsaDevice)
-	}
+	//if strings.TrimSpace(v.alsaDevice) != "" {
+	//	args = append(args, "--alsa-audio-device", v.alsaDevice)
+	//}
 
 	//	At the end, add the file to play or url to stream
 	args = append(args, audioPathOrUrl)
@@ -65,6 +64,8 @@ func (v *vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrU
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
+	log.Info().Strs("args", args).Msg("Playing cvlc audio")
+
 	err := cmd.Run()
 	if err != nil {
 		log.Err(err).Str("stderr", stderr.String()).Strs("args", args).Msg("Problem playing audio")
@@ -74,9 +75,9 @@ func (v *vlcAudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrU
 	return nil
 }
 
-func NewVLCAudioService(alsaDevice string) VLCAudioService {
+func NewVLCAudioService() VLCAudioService {
 	svc := &vlcAudioService{
-		alsaDevice: alsaDevice,
+		//alsaDevice: alsaDevice,
 	}
 	return svc
 }

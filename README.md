@@ -2,7 +2,7 @@
 REST service for multichannel audio on demand from Raspberry Pi.  Made with ❤️ for makers, DIY craftsmen, and professional soundstage designers everywhere
 
 ## Prerequisites
-The recommended release is the full Raspberry Pi OS 'Buster' (with desktop) release.  This is a legacy release, and available here: 
+The recommended release is the full Raspberry Pi OS 'Buster' (with desktop) release.  This is a legacy release, and [available here](https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/)
 
 The service will work with more recent versions, but simultaneous audio playback won't work properly.
 

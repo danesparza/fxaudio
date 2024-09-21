@@ -16,7 +16,7 @@ type ffaudioService struct{}
 
 func (f ffaudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error {
 	//	Build our argument list
-	args := []string{"-autoexit", "-nodisp", "-loglevel", "error"}
+	args := []string{"-c", "/usr/bin/ffplay", "-autoexit", "-nodisp", "-loglevel", "error"}
 
 	//	If we need to loop, indicate that we should
 	if loop {
@@ -27,7 +27,7 @@ func (f ffaudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl
 	args = append(args, audioPathOrUrl)
 
 	//	Finally, run the full command:
-	cmd := exec.CommandContext(ctx, "ffplay", args...)
+	cmd := exec.CommandContext(ctx, "/bin/bash", args...)
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer

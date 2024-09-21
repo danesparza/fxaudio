@@ -8,29 +8,33 @@ import (
 	"os/exec"
 )
 
-type mpg123audioService struct{}
+type FFAudioService interface {
+	PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error
+}
 
-func (a mpg123audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error {
+type ffaudioService struct{}
+
+func (f ffaudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error {
 	//	Build our argument list
-	args := []string{}
+	args := []string{"-autoexit", "-nodisp", "-loglevel", "error"}
 
 	//	If we need to loop, indicate that we should
 	if loop {
-		args = append(args, "--loop", "-1")
+		args = append(args, "-loop", "9999")
 	}
 
 	//	At the end, add the file to play or url to stream
 	args = append(args, audioPathOrUrl)
 
 	//	Finally, run the full command:
-	cmd := exec.CommandContext(ctx, "mpg123", args...)
+	cmd := exec.CommandContext(ctx, "ffplay", args...)
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
-	log.Info().Strs("args", args).Msg("Playing mpg123 audio")
+	log.Info().Strs("args", args).Msg("Playing ffplay audio")
 
 	err := cmd.Run()
 	if err != nil {
@@ -47,7 +51,7 @@ func (a mpg123audioService) PlayAudio(ctx context.Context, loop bool, audioPathO
 	return nil
 }
 
-func NewMPG123AudioService() AudioService {
-	svc := &mpg123audioService{}
+func NewFFAudioService() FFAudioService {
+	svc := &ffaudioService{}
 	return svc
 }

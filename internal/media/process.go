@@ -25,7 +25,7 @@ type BackgroundProcess struct {
 	DB data.AppDataService
 
 	// AS is the audio service to play audio files and streams
-	AS VLCAudioService
+	AS FFAudioService
 
 	// PlayAudio signals audio should be played
 	PlayAudio chan PlayAudioRequest

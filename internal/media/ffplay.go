@@ -8,11 +8,18 @@ import (
 	"os/exec"
 )
 
-type FFAudioService interface {
-	PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error
-}
-
 type ffaudioService struct{}
+
+func (a ffaudioService) CheckForPlayer() error {
+	//	Make sure player is installed
+	_, err := exec.LookPath("ffplay")
+	if err != nil {
+		err = fmt.Errorf("didn't find ffplay executable in the path: %w", err)
+		return err
+	}
+
+	return nil
+}
 
 func (f ffaudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error {
 	//	Build our argument list
@@ -51,7 +58,7 @@ func (f ffaudioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl
 	return nil
 }
 
-func NewFFAudioService() FFAudioService {
+func NewFFAudioService() AudioService {
 	svc := &ffaudioService{}
 	return svc
 }

@@ -14,6 +14,7 @@ import (
 
 type VLCAudioService interface {
 	PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error
+	CheckForPlayer() error
 	SetAlsaDevice(alsaDeviceName string)
 	GetAlsaDeviceName() string
 }
@@ -26,6 +27,17 @@ type vlcAudioService struct {
 	//	Using the system default device may be necessary for playback with certain devices like this:
 	//	https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview
 	alsaDevice string
+}
+
+func (a *vlcAudioService) CheckForPlayer() error {
+	//	Make sure player is installed
+	_, err := exec.LookPath("cvlc")
+	if err != nil {
+		err = fmt.Errorf("didn't find cvlc executable in the path: %w", err)
+		return err
+	}
+
+	return nil
 }
 
 func (v *vlcAudioService) SetAlsaDevice(alsaDeviceName string) {

@@ -13,7 +13,6 @@ import (
 	math_rand "math/rand"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 )
@@ -253,11 +252,9 @@ func (service Service) PlayAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//	Make sure mpg123 is installed
-	_, err = exec.LookPath("mpg123")
-	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
-		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+	//	Make sure player is installed
+	if err := service.AS.CheckForPlayer(); err != nil {
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -311,11 +308,9 @@ func (service Service) LoopAudio(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//	Make sure mpg123 is installed
-	_, err = exec.LookPath("mpg123")
-	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
-		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+	//	Make sure player is installed
+	if err := service.AS.CheckForPlayer(); err != nil {
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -366,11 +361,9 @@ func (service Service) StreamAudio(rw http.ResponseWriter, req *http.Request) {
 	//	Get just the file endpoint:
 	fileendpoint := strings.TrimSpace(request.Endpoint)
 
-	//	Make sure mpg123 is installed
-	_, err = exec.LookPath("mpg123")
-	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
-		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+	//	Make sure player is installed
+	if err := service.AS.CheckForPlayer(); err != nil {
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -433,11 +426,9 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 		fileendpoint = retval[randomIndex].FilePath
 	}
 
-	//	Make sure mpg123 is installed
-	_, err := exec.LookPath("mpg123")
-	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
-		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+	//	Make sure player is installed
+	if err := service.AS.CheckForPlayer(); err != nil {
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -509,11 +500,9 @@ func (service Service) PlayRandomAudioWithTag(rw http.ResponseWriter, req *http.
 		fileendpoint = retval[randomIndex].FilePath
 	}
 
-	//	Make sure mpg123 is installed
-	_, err := exec.LookPath("mpg123")
-	if err != nil {
-		err = fmt.Errorf("didn't find mpg123 executable in the path: %v", err)
-		sendErrorResponse(rw, err, http.StatusServiceUnavailable)
+	//	Make sure player is installed
+	if err := service.AS.CheckForPlayer(); err != nil {
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
 

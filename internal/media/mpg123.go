@@ -10,6 +10,17 @@ import (
 
 type mpg123audioService struct{}
 
+func (a mpg123audioService) CheckForPlayer() error {
+	//	Make sure player is installed
+	_, err := exec.LookPath("mpg123")
+	if err != nil {
+		err = fmt.Errorf("didn't find mpg123 executable in the path: %w", err)
+		return err
+	}
+
+	return nil
+}
+
 func (a mpg123audioService) PlayAudio(ctx context.Context, loop bool, audioPathOrUrl string) error {
 	//	Build our argument list
 	args := []string{}

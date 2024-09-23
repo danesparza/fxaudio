@@ -1,12 +1,7 @@
 # fxaudio [![Build and release](https://github.com/danesparza/fxaudio/actions/workflows/release.yaml/badge.svg)](https://github.com/danesparza/fxaudio/actions/workflows/release.yaml) 
 REST service for multichannel audio on demand from Raspberry Pi.  Made with ❤️ for makers, DIY craftsmen, and professional soundstage designers everywhere
 
-## Prerequisites
-The recommended release is the full Raspberry Pi OS 'Buster' (with desktop) release.  This is a legacy release, and [available here](https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/)
-
-I know -- it would be better if it worked with a 'lite' release, but because of Linux handles audio (and inexplicably insists it should be tied to the GUI), it's just much easier to setup with the full desktop version.  Even if you're just interacting via SSH.  Seriously.  Just get the desktop version.
-
-The service will work with more recent versions of Raspberry Pi OS, but simultaneous audio playback won't work properly.
+Unfortunately, audio in linux is just kind of ... stupid.  Over the course of many months, I have discovered that this service works best running as the default user on the Pi, and not as a service.  So:  just start it up with `fxaudio start` at the command line.  Also:  Be sure to set your default audio device using `raspi-config`.  Also:  set your volume using `alsamixer`.  Don't try to run this as root.  Or as a systemd service.  (Unless you want to be miserable).  Because audio in linux is just stupid.  Sorry about that.
 
 ### Audio output
 #### Option 1: Using HDMI
@@ -23,26 +18,11 @@ You can do a test with streaming music using `ffplay -autoexit -nodisp http://ic
 Run `speaker-test -c2` to generate white noise out of the speaker, alternating left and right.
 
 ## Installing
-Install the package repo (you only need to do this once per machine)
-```
-wget https://packages.cagedtornado.com/prereq.sh -O - | sh
-```
-Install the package
-```
-sudo apt install fxaudio
-```
-This automatically installs the latest **fxaudio** service with a default configuration, and starts the service as the `fxaudio` user. 
+Grab the latest release, copy it to your system, and make sure it's executable.  Then run it with `fxaudio start`
 
 You can then use the service at http://localhost:3030
 
 See the REST API documentation at http://localhost:3030/swagger/
-
-## Removing 
-Uninstalling is just as simple:
-
-```bash
-sudo apt remove fxaudio
-````
 
 ## Example hardware setup
 ![fxAudio example hardware setup](fxAudio_hardware_annotated.png)

@@ -1,7 +1,4 @@
 #!/bin/sh
 
-# Make sure the fxaudio user has permissions to the service directory:
-sudo chown -R fxaudio:fxaudio /var/lib/fxaudio
-
 systemctl enable fxaudio.service
 systemctl start fxaudio.service

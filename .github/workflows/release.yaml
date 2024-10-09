@@ -80,7 +80,7 @@ jobs:
         run: mkdir -p /tmp/binaries; gox -osarch="linux/arm" -ldflags "-X ${PACKAGE_PATH}/version.BuildNumber=${GITHUB_RUN_NUMBER} -X ${PACKAGE_PATH}/version.CommitID=${GITHUB_SHA} -X '${PACKAGE_PATH}/version.Prerelease=-'" -output "/tmp/binaries/${APP_NAME}_{{.OS}}_{{.Arch}}" $PACKAGE_PATH/...
 
       - name: Setup the debian package
-        run: mkdir -p "/tmp/packagestage"; cp -r ./dist "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/preinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/postinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/prerm"; tokenreplace -file "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/control" -token="{build}" -replacement="${GITHUB_RUN_NUMBER}";
+        run: mkdir -p "/tmp/packagestage"; cp -r ./dist "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/postinst"; chmod 755 "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/prerm"; tokenreplace -file "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/DEBIAN/control" -token="{build}" -replacement="${GITHUB_RUN_NUMBER}";
 
       - name: Create the debian package
         run: mkdir -p "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin"; cp "/tmp/binaries/fxaudio_linux_arm" "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin/fxaudio"; cd /tmp/packagestage; dpkg-deb -Zxz --build "${DEBIAN_PACKAGE_NAME}"; mv *.deb "/tmp/binaries";

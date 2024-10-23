@@ -19,7 +19,7 @@ Make sure that you have a stock Raspberry Pi installation and [make sure you hav
 
 You can do a streaming music test with the first HDMI port on the device (HDMI 0): `ffplay -autoexit -nodisp http://ice1.somafm.com/u80s-128-mp3`
 
-#### Either option: Testing audio output
+#### Any option: Testing audio output
 Run `speaker-test -c2` to generate white noise out of the speaker, alternating left and right.
 
 ## Installing

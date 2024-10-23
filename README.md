@@ -4,15 +4,20 @@ REST service for multichannel audio on demand from Raspberry Pi.  Made with ‚ù§Ô
 Unfortunately, audio in linux is just kind of ... stupid.  Over the course of many months, I have discovered that this service works best running as the default user on the Pi, and not as a service.  So:  just start it up with `fxaudio start` at the command line.  Also:  Be sure to set your default audio device using `raspi-config`.  Also:  set your volume using `alsamixer`.  Don't try to run this as root.  Or as a systemd service.  (Unless you want to be miserable).  Because audio in linux is just stupid.  Sorry about that.
 
 ### Audio output
-#### Option 1: Using HDMI
-Make sure that you have a stock Raspberry Pi installation and [make sure you have configured HDMI in your /boot/config.txt](https://raspberrypi.stackexchange.com/questions/32717/how-to-enable-sound-on-hdmi).  Also: [Buster might be a good legacy distro](https://www.reddit.com/r/raspberry_pi/comments/qujijj/no_hdmi_audio_in_raspiconfig_raspberry_os_lite/) to start with.  
+#### Option 1: Using the Raspberry Pi DigiAMP+
+I would recommend using the [Raspberry Pi DigiAMP+)[https://www.raspberrypi.com/products/digiamp-plus/] since it's now an official Raspbery Pi foundation product. Be sure to follow the [Raspberry Pi DigiAMP+ installation instructions](https://www.raspberrypi.com/documentation/accessories/audio.html#raspberry-pi-digiamp).  I have used a pair of Polk Audio M2 indoor/outdoor speakers with the DigiAMP+ and it's VERY loud. Use `alsamixer` to adjust volume of the speakers.
 
-You can do a streaming music test with the first HDMI port on the device (HDMI 0): `ffplay -autoexit -nodisp http://ice1.somafm.com/u80s-128-mp3`
+You can do a test with streaming music using `ffplay -autoexit -nodisp http://ice1.somafm.com/u80s-128-mp3`
 
 #### Option 2: Using the speaker bonnet
 I would recommend using the [Adafruit Speaker Bonnet for Raspberry Pi](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview) as well -- just get a [Pi with headers](https://www.adafruit.com/product/3708) and slide the bonnet right down on top of it (and be sure to follow the [Raspberry Pi OS configuration instructions](https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/raspberry-pi-usage) for the board).  I used a pair of [8 ohm 3" speakers](https://www.adafruit.com/product/1313) with the bonnet and it's reasonably loud. Use `alsamixer` to adjust volume of the speakers.
 
 You can do a test with streaming music using `ffplay -autoexit -nodisp http://ice1.somafm.com/u80s-128-mp3`
+
+#### Option 3: Using HDMI
+Make sure that you have a stock Raspberry Pi installation and [make sure you have configured HDMI in your /boot/config.txt](https://raspberrypi.stackexchange.com/questions/32717/how-to-enable-sound-on-hdmi).  Also: [Buster might be a good legacy distro](https://www.reddit.com/r/raspberry_pi/comments/qujijj/no_hdmi_audio_in_raspiconfig_raspberry_os_lite/) to start with.  This option might be a little unreliable, depending on the HDMI cable and system you're feeding into.
+
+You can do a streaming music test with the first HDMI port on the device (HDMI 0): `ffplay -autoexit -nodisp http://ice1.somafm.com/u80s-128-mp3`
 
 #### Either option: Testing audio output
 Run `speaker-test -c2` to generate white noise out of the speaker, alternating left and right.

@@ -4,11 +4,11 @@ on: [push]
 
 env:
   APP_NAME: fxaudio
-  DEBIAN_PACKAGE_NAME: fxaudio-1.1.${{github.run_number}}_armhf
   APP_VERSION: 1.1.${{github.run_number}}
+  DEBIAN_PACKAGE_NAME: fxaudio-1.1.${{github.run_number}}_armhf
   RELEASE_VERSION: v1.1.${{github.run_number}}
   PACKAGE_PATH: github.com/danesparza/fxaudio
-  GITHUB_TOKEN: ${{secrets.GHR_TOKEN}}
+  GO_VERSION: 1.24.0
 
 jobs:
   vulnerabilitycheck:
@@ -21,14 +21,14 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '>=1.22.3'
+          go-version: ${{env.GO_VERSION}}
           check-latest: true
 
       - name: Get scanner tool
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
 
       - name: Scan for vulnerabilities
-        run: govulncheck ./...
+        run: govulncheck '${{env.PACKAGE_PATH}}'
 
   test:
     name: Tests
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.22.3'
+          go-version: ${{env.GO_VERSION}}
 
       - name: Get dependencies
         run: go mod download
@@ -62,16 +62,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.22.3'
+          go-version: ${{env.GO_VERSION}}
 
       - name: Get compiler tool
         run: go install github.com/mitchellh/gox@latest
 
       - name: Get utilities
         run: go install github.com/danesparza/tokenreplace@latest
-
-      - name: Get release tool
-        run: go install github.com/tcnksm/ghr@latest
 
       - name: Get dependencies
         run: go mod download
@@ -86,7 +83,7 @@ jobs:
         run: mkdir -p "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin"; cp "/tmp/binaries/fxaudio_linux_arm64" "/tmp/packagestage/${DEBIAN_PACKAGE_NAME}/usr/bin/fxaudio"; cd /tmp/packagestage; dpkg-deb -Zxz --build "${DEBIAN_PACKAGE_NAME}"; mv *.deb "/tmp/binaries";
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Release binaries
           path: /tmp/binaries
@@ -100,7 +97,7 @@ jobs:
 
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Release binaries
           path: /tmp/binaries

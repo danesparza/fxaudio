@@ -1,9 +1,10 @@
 [Unit]
 Description=fxAudio service
+Wants=sound.target
 
 [Service]
-User=root
-Group=root
+User=admin
+Group=admin
 ExecStart=/usr/bin/fxaudio start --config=/etc/fxaudio/config.yaml
 Restart=on-failure
 RestartSec=5s

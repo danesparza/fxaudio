@@ -1,4 +1,13 @@
 #!/bin/sh
 
+set -e
+
+SERVICE_USER="admin"  # or dynamically set from debconf or prompt
+
+# Ensure data directory exists and is writable by service user
+mkdir -p /var/lib/fxaudio
+chown "$SERVICE_USER:$SERVICE_USER" /var/lib/fxaudio
+chmod 755 /var/lib/fxaudio
+
 systemctl enable fxaudio.service
 systemctl start fxaudio.service

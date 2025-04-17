@@ -1,13 +1,48 @@
 #!/bin/sh
-
 set -e
 
-SERVICE_USER="admin"  # or dynamically set from debconf or prompt
+# Get the logged in user as the default user
+current_user=$(logname)
+
+# Prompt the user
+printf "Enter the username that should run the fxaudio service [default: %s]" "$current_user"
+read service_user
+
+# Use current user if nothing entered
+if [ -z "$service_user" ]; then
+    service_user="$current_user"
+fi
+
+# Get the uid of the user
+service_uid=$(id -u "service_user")
+echo "User id for $service_user is $service_uid"
+
+service_file="/lib/systemd/system/fxaudio.service"
+echo "Creating systemd unit file $service_file"
+
+# Create a systemd unit from template
+sed "s/@SERVICE_USER@/$service_user/g" /DEBIAN/fxaudio.service.in > /lib/systemd/system/fxaudio.service
+
+# Update the XDG_RUNTIME_DIR with the service_uid
+if ! grep -q "XDG_RUNTIME_DIR" "$service_file"; then
+    sed -i "/^\[Service\]/a Environment=XDG_RUNTIME_DIR=/run/user/${service_uid}" "$service_file"
+fi
+
+# Reload and enable service
+chmod 644 /lib/systemd/system/fxaudio.service
+systemctl daemon-reload
+systemctl enable fxaudio.service
+
+echo "Service installed to run as user: $service_user"
 
 # Ensure data directory exists and is writable by service user
 mkdir -p /var/lib/fxaudio
-chown "$SERVICE_USER:$SERVICE_USER" /var/lib/fxaudio
+chown "$service_user:$service_user" /var/lib/fxaudio
 chmod 755 /var/lib/fxaudio
 
-systemctl enable fxaudio.service
+echo "Created data folder /var/lib/fxaudio"
+
+# Start the service
 systemctl start fxaudio.service
+
+

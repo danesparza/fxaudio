@@ -4,8 +4,8 @@ Wants=sound.target
 
 [Service]
 Environment="XDG_RUNTIME_DIR=/run/user/1000"
-User=admin
-Group=admin
+User=@SERVICE_USER@
+Group=@SERVICE_USER@
 ExecStart=/usr/bin/fxaudio start --config=/etc/fxaudio/config.yaml
 Restart=on-failure
 RestartSec=5s

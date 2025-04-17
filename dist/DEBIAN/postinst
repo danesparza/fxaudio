@@ -13,27 +13,23 @@ if [ -z "$service_user" ]; then
     service_user="$current_user"
 fi
 
+echo "Installing service to run as user: $service_user"
+
 # Get the uid of the user
-service_uid=$(id -u "service_user")
+service_uid=$(id -u "$service_user")
 echo "User id for $service_user is $service_uid"
 
-service_file="/lib/systemd/system/fxaudio.service"
-echo "Creating systemd unit file $service_file"
+# Path to your template and destination
+TEMPLATE_PATH="/DEBIAN/fxaudio.service.in"
+OUTPUT_PATH="/lib/systemd/system/fxaudio.service"
 
-# Create a systemd unit from template
-sed "s/@SERVICE_USER@/$service_user/g" /DEBIAN/fxaudio.service.in > /lib/systemd/system/fxaudio.service
+echo "Creating systemd unit file $OUTPUT_PATH"
 
-# Update the XDG_RUNTIME_DIR with the service_uid
-if ! grep -q "XDG_RUNTIME_DIR" "$service_file"; then
-    sed -i "/^\[Service\]/a Environment=XDG_RUNTIME_DIR=/run/user/${service_uid}" "$service_file"
-fi
-
-# Reload and enable service
-chmod 644 /lib/systemd/system/fxaudio.service
-systemctl daemon-reload
-systemctl enable fxaudio.service
-
-echo "Service installed to run as user: $service_user"
+# Do the replacements
+sed \
+  -e "s|@SERVICE_UID@|$service_uid|g" \
+  -e "s|@SERVICE_USER@|$service_user|g" \
+  "$TEMPLATE_PATH" > "$OUTPUT_PATH"
 
 # Ensure data directory exists and is writable by service user
 mkdir -p /var/lib/fxaudio
@@ -42,7 +38,10 @@ chmod 755 /var/lib/fxaudio
 
 echo "Created data folder /var/lib/fxaudio"
 
-# Start the service
+# Reload, enable, and start the service
+chmod 644 /lib/systemd/system/fxaudio.service
+systemctl daemon-reload
+systemctl enable fxaudio.service
 systemctl start fxaudio.service
 
 

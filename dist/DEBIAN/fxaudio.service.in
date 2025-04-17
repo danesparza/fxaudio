@@ -3,7 +3,7 @@ Description=fxAudio service
 Wants=sound.target
 
 [Service]
-Environment="XDG_RUNTIME_DIR=/run/user/1000"
+Environment="XDG_RUNTIME_DIR=/run/user/@SERVICE_UID@"
 User=@SERVICE_USER@
 Group=@SERVICE_USER@
 ExecStart=/usr/bin/fxaudio start --config=/etc/fxaudio/config.yaml

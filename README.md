@@ -40,25 +40,34 @@ Run `speaker-test -c2` to generate white noise out of the speaker, alternating l
 
 ## Installation
 ### Prerequisites
-Install Raspberry Pi OS.  For best results, use the [Raspberry Pi imager](https://www.raspberrypi.com/software/)
-and pick 'Raspberry Pi OS (64-bit)' (Bookworm or later).
+Install Raspberry Pi OS (Bookworm or later) on your device. For best results, use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) and select **Raspberry Pi OS (64-bit)**.
 
-Install the package repo (you only need to do this once per machine)
-```
+Install the prerequisite package repository (one-time setup per machine):
+
+``` bash
 wget https://packages.cagedtornado.com/prereq.sh -O - | sh
 ```
 
-### Package installation
-Install the package
-```
+### Installing fxaudio
+Install the fxaudio package:
+
+``` bash
 sudo apt install fxaudio
 ```
 
-NOTE: The installation process now prompts you for a user to run the service as.  This user must already exist (and it defaults to the current user, which is usually fine).  
+During installation, you will be prompted to specify a **non-root** user to run the fxaudio service.
 
-You can then use the service at http://localhost:3030
+- If you press Enter without typing anything, it will default to the current user (recommended in most cases).
+- The specified user **must already exist** on the system and **must be a member of the `audio` group**.
+(On a standard Raspberry Pi setup, the first user — such as `pi` — is already in the `audio` group.)
 
-See the REST API documentation at http://localhost:3030/swagger/
+**Important:**
+- Do not run `fxaudio` as the `root` user. Audio on Linux can behave inconsistently under root, leading to unreliable results.
+- Ensure your audio device is set correctly using `raspi-config`, and adjust output levels with `alsamixer`.
+
+After installation, the service will be running and available at:
+- REST API: `http://localhost:3030`
+- API Documentation: `http://localhost:3030/swagger/`
 
 ## Example hardware setup
 ![fxAudio example hardware setup](fxAudio_hardware_annotated.png)

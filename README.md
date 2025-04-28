@@ -41,7 +41,7 @@ Run `speaker-test -c2` to generate white noise out of the speaker, alternating l
 ## Installation
 ### Prerequisites
 Install Raspberry Pi OS.  For best results, use the [Raspberry Pi imager](https://www.raspberrypi.com/software/)
-and pick 'Raspberry Pi OS (other)' and then 'Raspberry Pi OS Lite (64-bit)'.
+and pick 'Raspberry Pi OS (64-bit)' (Bookworm or later).
 
 Install the package repo (you only need to do this once per machine)
 ```

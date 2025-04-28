@@ -1,7 +1,13 @@
 # fxaudio [![Build and release](https://github.com/danesparza/fxaudio/actions/workflows/release.yaml/badge.svg)](https://github.com/danesparza/fxaudio/actions/workflows/release.yaml) 
 REST service for multichannel audio on demand from Raspberry Pi.  Made with ❤️ for makers, DIY craftsmen, and professional soundstage designers everywhere
 
-Unfortunately, audio in linux is just kind of ... stupid.  Over the course of many months, I have discovered that this service works best running as the default user on the Pi, and not as a service.  So:  just start it up with `fxaudio start` at the command line.  Also:  Be sure to set your default audio device using `raspi-config`.  Also:  set your volume using `alsamixer`.  Don't try to run this as root.  Or as a systemd service.  (Unless you want to be miserable).  Because audio in linux is just stupid.  Sorry about that.
+Unfortunately, audio in linux is just kind of ... stupid.  Over the course of many months, I have discovered that this service works best running as a non-root user -- so the installation process now prompts you for a user to run the service as (and it defaults to the current user, which is usually fine).
+
+Pro tips:
+- Make sure the user that the service runs under already exists and has access to the `audio` group.  (The `pi` user -- or whatever the first user is that you setup -- will be in the `audio` group by default).
+- Be sure to set your default audio device using `raspi-config`.  
+- Also:  set your volume using `alsamixer`.  
+- Don't try to run this as root.  (Unless you want to be miserable).  Because audio in linux is just stupid.  Sorry about that.
 
 ### Audio output
 #### Option 1: Using the Raspberry Pi DigiAMP+
@@ -32,8 +38,23 @@ You can do a streaming music test with the first HDMI port on the device (HDMI 0
 #### Any option: Testing audio output
 Run `speaker-test -c2` to generate white noise out of the speaker, alternating left and right.
 
-## Installing
-Grab the latest release, copy it to your system, and make sure it's executable.  Then run it with `fxaudio start`
+## Installation
+### Prerequisites
+Install Raspberry Pi OS.  For best results, use the [Raspberry Pi imager](https://www.raspberrypi.com/software/)
+and pick 'Raspberry Pi OS (other)' and then 'Raspberry Pi OS Lite (64-bit)'.
+
+Install the package repo (you only need to do this once per machine)
+```
+wget https://packages.cagedtornado.com/prereq.sh -O - | sh
+```
+
+### Package installation
+Install the package
+```
+sudo apt install fxaudio
+```
+
+NOTE: The installation process now prompts you for a user to run the service as.  This user must already exist (and it defaults to the current user, which is usually fine).  
 
 You can then use the service at http://localhost:3030
 

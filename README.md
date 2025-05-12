@@ -11,7 +11,7 @@ Pro tips:
 
 ### Audio output
 #### Option 1: Using the Raspberry Pi DigiAMP+
-I would recommend using the [Raspberry Pi DigiAMP+)[https://www.raspberrypi.com/products/digiamp-plus/] since it's now an official Raspbery Pi foundation product. Be sure to follow the [Raspberry Pi DigiAMP+ installation instructions](https://www.raspberrypi.com/documentation/accessories/audio.html#raspberry-pi-digiamp).  
+I would recommend using the [Raspberry Pi DigiAMP+](https://www.raspberrypi.com/products/digiamp-plus/) since it's now an official Raspbery Pi foundation product. Be sure to follow the [Raspberry Pi DigiAMP+ installation instructions](https://www.raspberrypi.com/documentation/accessories/audio.html#raspberry-pi-digiamp).  
 
 Hint:  I used the following settings in `/boot/firmware/config.txt` at the very bottom
 ```

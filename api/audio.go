@@ -1,8 +1,6 @@
 package api
 
 import (
-	crypto_rand "crypto/rand"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"github.com/danesparza/fxaudio/internal/media"
@@ -582,8 +580,5 @@ func (service Service) StopAllAudio(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-func init() {
-	var b [8]byte
-	crypto_rand.Read(b[:])
-	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
-}
+// No need for init() function to seed the random number generator
+// as Go 1.20+ automatically seeds the global random number generator

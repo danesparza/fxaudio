@@ -79,8 +79,12 @@ func (service Service) UploadFile(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//	Add it to our system database
-	service.DB.AddFile(req.Context(), destinationFile, "Audio file")
+	//      Add it to our system database
+	if _, err = service.DB.AddFile(req.Context(), destinationFile, "Audio file"); err != nil {
+		err = fmt.Errorf("error adding file: %v", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{
@@ -412,7 +416,7 @@ func (service Service) PlayRandomAudio(rw http.ResponseWriter, req *http.Request
 
 		//	If we don't have anything to pick from, bomb out
 		if len(retval) < 1 {
-			err = fmt.Errorf("can't play anything -- no endpoint specified, and no files to randomly pick from: %v", err)
+			err = fmt.Errorf("can't play anything -- no endpoint specified, and no files to randomly pick from")
 			sendErrorResponse(rw, err, http.StatusBadRequest)
 			return
 		}
@@ -486,7 +490,7 @@ func (service Service) PlayRandomAudioWithTag(rw http.ResponseWriter, req *http.
 
 		//	If we don't have anything to pick from, bomb out
 		if len(retval) < 1 {
-			err = fmt.Errorf("can't play anything -- no endpoint specified, and no files to randomly pick from: %v", err)
+			err = fmt.Errorf("can't play anything -- no endpoint specified, and no files to randomly pick from")
 			sendErrorResponse(rw, err, http.StatusBadRequest)
 			return
 		}

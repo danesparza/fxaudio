@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/cors v1.2.1
-	github.com/golang-migrate/migrate/v4 v4.18.2
+	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/hashicorp/go-version v1.7.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mitchellh/go-homedir v1.1.0

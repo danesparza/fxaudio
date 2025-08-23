@@ -8,7 +8,7 @@ env:
   DEBIAN_PACKAGE_NAME: fxaudio-1.1.${{github.run_number}}_armhf
   RELEASE_VERSION: v1.1.${{github.run_number}}
   PACKAGE_PATH: github.com/danesparza/fxaudio
-  GO_VERSION: 1.24.2
+  GO_VERSION: 1.25.0
 
 jobs:
   vulnerabilitycheck:

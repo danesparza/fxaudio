@@ -62,7 +62,7 @@ During installation, you will be prompted to specify a **non-root** user to run 
 (On a standard Raspberry Pi setup, the first user — such as `pi` — is already in the `audio` group.)
 
 **Important:**
-- Do not run `fxaudio` as the `root` user. Audio on Linux can behave inconsistently under root, leading to unreliable results.
+- Do not run `fxaudio` as the `root` user.  I cannot overstate this. Audio on Linux can behave inconsistently under root, leading to unreliable results.
 - Ensure your audio device is set correctly using `raspi-config`, and adjust output levels with `alsamixer`.
 
 After installation, the service will be running and available at:

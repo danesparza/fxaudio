@@ -68,9 +68,9 @@ func (bp *BackgroundProcess) HandleAndProcess(systemctx context.Context) {
 				bp.PlayingAudio.rwMutex.Unlock()
 
 				//	Play the audio from the request:
-				if err := bp.AS.PlayAudio(ctx, playReq.Loop, playReq.FilePath); err != nil {
+				if err := bp.AS.PlayAudio(ctx, req.Loop, req.FilePath); err != nil {
 					//	Log an error playing a file
-					log.Err(err).Str("filepath", playReq.FilePath).Msg("problem playing audio")
+					log.Err(err).Str("filepath", req.FilePath).Msg("problem playing audio")
 				}
 
 				//	Remove ourselves from the map and exit (critical section)

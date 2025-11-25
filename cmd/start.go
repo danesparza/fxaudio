@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/fxaudio/internal/data"
 	"github.com/danesparza/fxaudio/internal/media"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -46,6 +47,9 @@ func start(cmd *cobra.Command, args []string) {
 	uploadPath := viper.GetString("upload.path")
 	uploadByteLimit := viper.GetString("upload.bytelimit")
 	maxProcs := runtime.GOMAXPROCS(0)
+
+	//	Seed global RNG for random audio selection
+	rand.Seed(time.Now().UnixNano())
 
 	//	Emit what we know:
 	log.Info().

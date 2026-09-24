@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/danesparza/fxaudio/internal/data"
+	"github.com/danesparza/fxaudio/internal/discovery"
 	"github.com/danesparza/fxaudio/internal/media"
 	"math/rand"
-	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
@@ -38,9 +38,11 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	//	Trap program exit appropriately
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(cmd.Context())
+	defer cancel()
 	sigs := make(chan os.Signal, 2)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sigs)
 	go handleSignals(ctx, sigs, cancel)
 
 	systemdb := viper.GetString("datastore.system")
@@ -99,9 +101,15 @@ func start(cmd *cobra.Command, args []string) {
 	//	Format the bound interface:
 	formattedServerPort := fmt.Sprintf(":%v", viper.GetString("server.port"))
 
-	//	Start the service and display how to access it
-	log.Info().Str("server", formattedServerPort).Msg("Started REST service")
-	log.Err(http.ListenAndServe(formattedServerPort, r)).Msg("HTTP API service error")
+	// Bind the API before publishing its discovery advertisement.
+	if err := discovery.ListenAndServe(ctx, formattedServerPort, r, discovery.Config{
+		Enabled: viper.GetBool("discovery.enabled"),
+		Name:    viper.GetString("discovery.name"),
+		ID:      viper.GetString("discovery.id"),
+		Service: "fxaudio",
+	}); err != nil {
+		log.Error().Err(err).Msg("HTTP API service error")
+	}
 }
 
 func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.CancelFunc) {
@@ -117,7 +125,6 @@ func handleSignals(ctx context.Context, sigs <-chan os.Signal, cancel context.Ca
 
 		log.Info().Msg("Shutting down ...")
 		cancel()
-		os.Exit(0)
 	}
 }
 

@@ -61,6 +61,9 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	//	Set our defaults
+	viper.SetDefault("discovery.enabled", true)
+	viper.SetDefault("discovery.name", "")
+	viper.SetDefault("discovery.id", "")
 	viper.SetDefault("datastore.system", filepath.Join(home, "fxaudio", "db", "fxaudio.db"))
 	viper.SetDefault("upload.path", path.Join(home, "fxaudio", "uploads"))
 	viper.SetDefault("upload.bytelimit", 15*1024*1024) // 15MB

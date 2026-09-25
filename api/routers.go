@@ -14,7 +14,7 @@ func NewRouter(apiService Service) http.Handler {
 
 	//	Add middleware
 	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
+	// Keep the socket peer address; forwarded headers are untrusted on the LAN.
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5))
 	r.Use(ApiVersionMiddleware)

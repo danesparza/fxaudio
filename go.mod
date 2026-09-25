@@ -1,9 +1,9 @@
 module github.com/danesparza/fxaudio
 
-go 1.25.0
+go 1.25.13
 
 require (
-	github.com/go-chi/chi/v5 v5.2.2
+	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-chi/cors v1.2.2
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/grandcat/zeroconf v1.0.0
